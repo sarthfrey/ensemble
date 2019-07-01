@@ -36,9 +36,12 @@ class Ensemble(object):
     return model_function(*args, **kwargs)
 
 
-class Model(object):
+class _Model(object):
   def __init__(self, *ensemble_names):
     self.ensemble_names = ensemble_names
 
   def __call__(self, model_function):
     return Ensemble(model_function, *self.ensemble_names)
+
+def model(*ensemble_names):
+  return _Model(*ensemble_names)

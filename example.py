@@ -1,14 +1,14 @@
-from ensemble import Model, Ensemble
+from ensemble import model, Ensemble
 
 
 def h():
   pass
 
-@Model('e1', 'e2')
+@model('e1', 'e2')
 def f(x, y=3, z=4):
   return x + y + z
 
-@Model('e1')
+@model('e1')
 def g(y):
   return y**3
 

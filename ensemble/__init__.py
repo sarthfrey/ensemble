@@ -1,1 +1,1 @@
-from .ensemble import Model, Ensemble
+from .ensemble import model, Ensemble
