@@ -1,7 +1,6 @@
 from collections import defaultdict
 
 
-# Both used for decoration and regular object instantiation
 class Ensemble(object):
   model_functions = {}
   ensemble_groups = defaultdict(set)
@@ -19,18 +18,13 @@ class Ensemble(object):
     if model_function is None:
       self.ensemble = specifier
     else:
+      self.model_function = model_function
       self.ensemble_groups[model_function.__name__] |= ensemble_names
       self.model_functions[model_function.__name__] = model_function
 
   def __call__(self, *args, **kwargs):
-    model = kwargs.get('model')
-    if callable(model):
-      raise ValueError('model should not be callable')
-      return self.__model
-    else:
-      return self.__model(*args, **kwargs)
-
-  def __model(self, *args, **kwargs):
+    if 'model' not in kwargs:
+      return self.model_function(*args, **kwargs)
     model = kwargs.get('model')
     if model not in self.model_functions or model not in self.ensemble_groups:
       raise ValueError('There is no model function `{}` decorated with @Model'.format(model))

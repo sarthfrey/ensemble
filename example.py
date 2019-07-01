@@ -40,4 +40,7 @@ if __name__ == '__main__':
   # you may specify your arguments positionally as usual
   print(e1(3, model='f'))
 
+  # you may call your functions normally
+  print(f(1))
+  print(g(1))
   print(f(1))
