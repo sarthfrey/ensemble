@@ -31,7 +31,7 @@ if __name__ == '__main__':
   except ValueError:
     pass
 
-  # try to use model `h` but it's not decorated with @Model
+  # try to use model `h` but it's not decorated with @model
   try:
     print(e1(model='h', y=3))
   except ValueError:

@@ -27,7 +27,7 @@ class Ensemble(object):
       return self.model_function(*args, **kwargs)
     model = kwargs.get('model')
     if model not in self.model_functions or model not in self.ensemble_groups:
-      raise ValueError('There is no model function `{}` decorated with @Model'.format(model))
+      raise ValueError('There is no decorated model function `{}`'.format(model))
     model_function = self.model_functions[model]
     ensemble_group = self.ensemble_groups[model]
     if self.ensemble not in ensemble_group:
