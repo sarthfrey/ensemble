@@ -12,6 +12,10 @@ def f(x, y=3, z=4):
 def g(y):
   return y**3
 
+@model('e1')
+def i(model):
+  return model
+
 
 if __name__ == '__main__':
 
@@ -44,3 +48,5 @@ if __name__ == '__main__':
   print(f(1))
   print(g(1))
   print(f(1))
+
+  #print(i(model=1))
