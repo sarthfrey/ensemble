@@ -13,8 +13,8 @@ def g(y):
   return y**3
 
 @model('e1')
-def i(model):
-  return model
+def i(x):
+  return x
 
 
 if __name__ == '__main__':
@@ -48,5 +48,9 @@ if __name__ == '__main__':
   print(f(1))
   print(g(1))
   print(f(1))
+
+  print(repr(e1))
+  print(str(e1))
+  print(e1)
 
   #print(i(model=1))

@@ -1,4 +1,6 @@
 import inspect
+import pprint
+import json
 from collections import defaultdict
 
 
@@ -23,6 +25,31 @@ class Ensemble(object):
       raise ValueError('Model function `{}` is not attached to ensemble `{}`'.format(model, self.name))
     kwargs.pop('model', None)
     return model_function(*args, **kwargs)
+
+  def __repr__(self):
+    m = ''.join(f'    \'{k}\': {pprint.pformat(v)}\n' for k, v in self.get_models_functions())
+    return (
+      'Ensemble(\n'
+      f'  name=\'{self.name}\',\n'
+      '  model_functions={\n'
+      f'{m}'
+      '  }\n'
+      ')'
+    )
+
+  def __str__(self):
+    return self.__repr__()
+
+  def get_models_functions(self):
+    return (
+      (n, m) for n, m in self.model_functions.items() if self.name in self.ensemble_groups[n]
+    )
+
+  def call_all_models(self, *args, **kwargs):
+    return {
+      n: m(*args, **kwargs) for n, m in self.get_models_functions()
+    }
+
 
 
 class _Model(Ensemble):
