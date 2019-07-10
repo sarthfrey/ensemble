@@ -12,9 +12,17 @@ def f(x, y=3, z=4):
 def g(y):
   return y**3
 
-@model('e1')
+@model('e1', 'e3')
 def i(x):
   return x
+
+@model('e3')
+def i2(x):
+  return x**2
+
+@model('e3')
+def i3(x):
+  return x**3
 
 
 if __name__ == '__main__':
@@ -54,3 +62,7 @@ if __name__ == '__main__':
   print(e1)
 
   #print(i(model=1))
+
+  # send the same arguments to all the models in the ensemble and get all results
+  e3 = Ensemble('e3')
+  print(e3.call_all_models(x=2))
