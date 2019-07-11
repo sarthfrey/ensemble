@@ -6,7 +6,7 @@
 
 ### Examples
 
-Multiplex between functions:
+Define your model functions and create your ensemble:
 
 ```
 >>> from ensemble import Ensemble
@@ -20,20 +20,25 @@ Multiplex between functions:
 ...     name='e1',
 ...     model_fns=[function1, function2],
 ... )
+```
+
+Multiplex between functions:
+
+```
 >>> my_ensemble(model='function1', x=2)
 4
 >>> my_ensemble(model='function2', y=2)
 8
 ```
 
-Easily call them all:
+Call all the models in the ensemble:
 
 ```
 >>> my_ensemble.all(x=4, y=3)
 {'function1': 16, 'function2': 27}
 ```
 
-If you have a monolithic codebase you may prefer to specify your models within the same file they are defined, without importing your Ensemble. With `ensemble`, you may simply decorate your model functions in order to attach them to an ensemble:
+You may instead decorate your model functions with `@model` in order to attach them to an ensemble:
 
 ```
 >>> from ensemble import model
@@ -57,7 +62,6 @@ You may even attach a model function to multiple ensembles!
 ... def func3(x, y):
 ...     return x**3 + y
 ...
->>> e2 = Ensemble('e2')
 >>> e2.all(x=2, y=3)
 {'func1': 4, 'func2': 8, 'func3': 11}
 >>>
