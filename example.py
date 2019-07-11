@@ -21,8 +21,8 @@ def i2(x):
   return x**2
 
 @model('e3')
-def i3(x):
-  return x**3
+def i3(x, y):
+  return x**3 + y
 
 
 if __name__ == '__main__':
@@ -61,7 +61,7 @@ if __name__ == '__main__':
 
   # send the same arguments to all the models in the ensemble and get all results
   e3 = Ensemble('e3')
-  print(e3.call_all_models(x=2))
+  print(e3.all(x=2, y=3))
 
   def a(x):
     return x + 1

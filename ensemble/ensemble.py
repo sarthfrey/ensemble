@@ -1,5 +1,6 @@
 import pprint
 import json
+import inspect
 from collections import defaultdict
 
 
@@ -57,7 +58,10 @@ class Ensemble(object):
       (n, m) for n, m in self.model_functions.items() if self.name in self.ensemble_groups[n]
     )
 
-  def call_all_models(self, *args, **kwargs):
-    return {
-      n: m(*args, **kwargs) for n, m in self.get_models_functions()
-    }
+  def all(self, *args, **kwargs):
+    return_dict = dict()
+    for model_name, model_function in self.get_models_functions():
+      arg_names = inspect.getfullargspec(model_function)[0]
+      filtered_kwargs = {k: v for k, v in kwargs.items() if k in arg_names}
+      return_dict[model_name] = model_function(*args, **filtered_kwargs)
+    return return_dict
