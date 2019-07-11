@@ -1,6 +1,8 @@
 # ensemble
 
-Model ensemble utility optimized for low barrier integration. If you find yourself needing to use one function to call many functions, this is what you need.
+*A model ensemble utility optimized for low barrier integration*
+
+**TL;DR** if you find yourself needing to use one function to call many functions, this is what you need.
 
 ### Examples
 
