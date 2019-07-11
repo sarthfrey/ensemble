@@ -79,6 +79,9 @@ class Ensemble(object):
   def generate_all_call_return_values(self, **kwargs):
     return (return_value for _, return_value in self.generate_all_calls(**kwargs))
 
+  def get_all_call_return_values(self, **kwargs):
+    return list(self.generate_all_call_return_values(**kwargs))
+
   def all(self, **kwargs):
     return {k: v for k, v in self.generate_all_calls(**kwargs)}
 
@@ -86,7 +89,7 @@ class Ensemble(object):
     return agg(self.generate_all_call_return_values(**kwargs))
 
   def apply(self, app, **kwargs):
-    return app(list(self.generate_all_call_return_values(**kwargs)))
+    return app(self.get_all_call_return_values(**kwargs))
 
   def mean(self, **kwargs):
     return self.apply(np.mean, **kwargs)
@@ -99,5 +102,5 @@ class Ensemble(object):
     return self.apply(app, **kwargs)
 
   def weighted_sum(self, **kwargs):
-    return np.dot(list(self.generate_all_call_return_values(**kwargs)), self._get_weights())
+    return np.dot(self.get_all_call_return_values(**kwargs), self._get_weights())
 
