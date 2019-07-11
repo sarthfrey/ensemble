@@ -69,3 +69,5 @@ You may even attach a model function to multiple ensembles!
 >>> e3.all(x=2, y=3)
 {'func3': 11}
 ```
+
+In the above example, ensemble `e2` contains `func1`, `func2`, and `func3`, while ensemble `e3` contains just `func3`.
