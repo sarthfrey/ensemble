@@ -1,4 +1,3 @@
-import inspect
 import pprint
 import json
 from collections import defaultdict
@@ -8,21 +7,20 @@ class Ensemble(object):
   model_functions = {}
   ensemble_groups = defaultdict(set)
 
-  def __init__(self, name):
+  def __init__(self, name, model_fns=[]):
     self.name = name
     if not name or not isinstance(name, str):
       raise ValueError('Ensemble name must be a non-empty string')
+    for model_function in model_fns:
+      self.model_functions[model_function.__name__] = model_function
 
   def __call__(self, *args, **kwargs):
     if 'model' not in kwargs:
       return ValueError('Ensemble object must be called with `model` argument')
-    model = kwargs.get('model')
-    if model not in self.model_functions or model not in self.ensemble_groups:
-      raise ValueError('There is no decorated model function `{}`'.format(model))
-    model_function = self.model_functions[model]
-    ensemble_group = self.ensemble_groups[model]
-    if self.name not in ensemble_group:
-      raise ValueError('Model function `{}` is not attached to ensemble `{}`'.format(model, self.name))
+    model_name = kwargs.get('model')
+    self._raise_if_model_not_found(model_name)
+    self._raise_if_model_not_in_ensemble(model_name)
+    model_function = self.model_functions[model_name]
     kwargs.pop('model', None)
     return model_function(*args, **kwargs)
 
@@ -40,6 +38,15 @@ class Ensemble(object):
   def __str__(self):
     return self.__repr__()
 
+  def _raise_if_model_not_found(self, model_name):
+    if model_name not in self.model_functions or model_name not in self.ensemble_groups:
+      raise ValueError('There is no decorated model function `{}` and it was not added to the Ensemble'.format(model_name))
+
+  def _raise_if_model_not_in_ensemble(self, model_name):
+    ensemble_group = self.ensemble_groups[model_name]
+    if self.name not in ensemble_group:
+      raise ValueError('Model function `{}` is not attached to ensemble `{}`'.format(model_name, self.name))
+
   def get_models_functions(self):
     return (
       (n, m) for n, m in self.model_functions.items() if self.name in self.ensemble_groups[n]
@@ -49,37 +56,3 @@ class Ensemble(object):
     return {
       n: m(*args, **kwargs) for n, m in self.get_models_functions()
     }
-
-
-
-class _Model(Ensemble):
-  invalid_args_names = [
-    'model',
-  ]
-
-  def __init__(self, model_function, *ensemble_names):
-    self.model_function = model_function
-    self.ensemble_names = set(ensemble_names)
-    if any(not ensemble_name for ensemble_name in self.ensemble_names):
-      raise ValueError('Must provide a valid ensemble names')
-    super().model_functions[model_function.__name__] = model_function
-    super().ensemble_groups[model_function.__name__] |= self.ensemble_names
-    _Model._validate_model_function(model_function)
-
-  def __call__(self, *args, **kwargs):
-    return self.model_function(*args, **kwargs)
-
-  @staticmethod
-  def _validate_model_function(model_function):
-    arg_names = inspect.getfullargspec(model_function)[0]
-    for invalid_arg_name in _Model.invalid_args_names:
-      if invalid_arg_name in arg_names:
-        raise ValueError(
-          f'Function `{model_function.__name__}` is decorated with @model '
-          f'and so it may not have `{invalid_arg_name}` as an argument'
-        )
-
-def model(*ensemble_names):
-  def wrapper(model_function):
-    return _Model(model_function, *ensemble_names)
-  return wrapper

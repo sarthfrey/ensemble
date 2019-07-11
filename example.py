@@ -57,11 +57,7 @@ if __name__ == '__main__':
   print(g(1))
   print(f(1))
 
-  print(repr(e1))
-  print(str(e1))
   print(e1)
-
-  #print(i(model=1))
 
   # send the same arguments to all the models in the ensemble and get all results
   e3 = Ensemble('e3')
