@@ -70,4 +70,25 @@ You may even attach a model function to multiple ensembles!
 {'func3': 11}
 ```
 
+If you forget what models are in your ensemble, just check!
+
+```
+>>> e2
+Ensemble(
+  name='e2',
+  model_functions={
+    'func1': <function func1 at 0x1024fa9d8>
+    'func2': <function func2 at 0x1024faa60>
+    'func3': <function func3 at 0x1024fa950>
+  }
+)
+>>> e3
+Ensemble(
+  name='e3',
+  model_functions={
+    'func3': <function func3 at 0x1024fa950>
+  }
+)
+```
+
 In the above example, ensemble `e2` contains `func1`, `func2`, and `func3`, while ensemble `e3` contains just `func3`.
