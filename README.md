@@ -2,7 +2,7 @@
 
 *A model ensemble utility optimized for low barrier integration*
 
-[Model Ensemble](https://www.opendoor.com/w/wp-content/uploads/2018/11/the-intuition-behind-opendoor-home-pricing.png)
+![Model Ensemble](https://www.opendoor.com/w/wp-content/uploads/2018/11/the-intuition-behind-opendoor-home-pricing.png)
 
 **TL;DR** if you find yourself needing to use one function to call many functions, this is what you need.
 
