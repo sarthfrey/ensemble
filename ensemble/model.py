@@ -13,9 +13,8 @@ class _Model(Ensemble):
     self.ensemble_names = set(ensemble_names)
     if any(not ensemble_name for ensemble_name in self.ensemble_names):
       raise ValueError('Must provide a valid ensemble names')
-    super().model_functions[model_function.__name__] = model_function
-    super().ensemble_groups[model_function.__name__] |= self.ensemble_names
-    super().arg_names[model_function.__name__] |= set(inspect.getfullargspec(model_function)[0])
+    for ensemble_name in ensemble_names:
+      super().add_model(model_function, ensemble_name)
     _Model._validate_model_function(model_function)
 
   def __call__(self, *args, **kwargs):
