@@ -13,6 +13,7 @@ class Ensemble(object):
       raise ValueError('Ensemble name must be a non-empty string')
     for model_function in model_fns:
       self.model_functions[model_function.__name__] = model_function
+      self.ensemble_groups[model_function.__name__] |= set([self.name])
 
   def __call__(self, *args, **kwargs):
     if 'model' not in kwargs:
@@ -40,12 +41,16 @@ class Ensemble(object):
 
   def _raise_if_model_not_found(self, model_name):
     if model_name not in self.model_functions or model_name not in self.ensemble_groups:
-      raise ValueError('There is no decorated model function `{}` and it was not added to the Ensemble'.format(model_name))
+      raise ValueError(
+        f'Either there is no decorated model function `{model_name}` or it was not added to the Ensemble'
+      )
 
   def _raise_if_model_not_in_ensemble(self, model_name):
     ensemble_group = self.ensemble_groups[model_name]
     if self.name not in ensemble_group:
-      raise ValueError('Model function `{}` is not attached to ensemble `{}`'.format(model_name, self.name))
+      raise ValueError(
+        f'Model function `{model_name}` is not attached to ensemble `{self.name}`'
+      )
 
   def get_models_functions(self):
     return (

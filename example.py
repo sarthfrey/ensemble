@@ -62,3 +62,14 @@ if __name__ == '__main__':
   # send the same arguments to all the models in the ensemble and get all results
   e3 = Ensemble('e3')
   print(e3.call_all_models(x=2))
+
+  def a(x):
+    return x + 1
+
+  def b(y):
+    return y + 2
+
+  # you may directly specify model functions to the ensemble
+  e4 = Ensemble('e4', model_fns=[a, b])
+  print(e4(model='a', x=4))
+  print(e4(model='b', y=4))
