@@ -2,22 +2,29 @@ import pprint
 import json
 import inspect
 import numpy as np
+
 from collections import defaultdict
+from functools import partial
 
 
 class Ensemble(object):
   model_functions = {}
   ensemble_groups = defaultdict(set)
   arg_names = defaultdict(set)
+  weights = defaultdict(dict)
 
-  def __init__(self, name, model_fns=[]):
+  def __init__(self, name, model_fns=[], weights=None):
     self.name = name
     if not name or not isinstance(name, str):
       raise ValueError('Ensemble name must be a non-empty string')
-    for model_function in model_fns:
+    if weights and len(weights) != len(model_fns):
+      raise ValueError('Number of weights must be equal to number of model functions if weights are specified')
+    for i, model_function in enumerate(model_fns):
       self.model_functions[model_function.__name__] = model_function
       self.ensemble_groups[model_function.__name__] |= set([self.name])
       self.arg_names[model_function.__name__] |= set(inspect.getfullargspec(model_function)[0])
+      if weights:
+        self.weights[self.name][model_function.__name__] = weights[i]
 
   def __call__(self, *args, **kwargs):
     if 'model' not in kwargs:
@@ -56,6 +63,9 @@ class Ensemble(object):
         f'Model function `{model_name}` is not attached to ensemble `{self.name}`'
       )
 
+  def _get_weights(self):
+    return list(self.weights[self.name].values()) if self.weights else None
+
   def generate_model_functions(self):
     for model_name, model_function in self.model_functions.items():
       if self.name in self.ensemble_groups[model_name]:
@@ -80,3 +90,14 @@ class Ensemble(object):
 
   def mean(self, **kwargs):
     return self.apply(np.mean, **kwargs)
+
+  def sum(self, **kwargs):
+    return self.apply(np.sum, **kwargs)
+
+  def weighted_mean(self, **kwargs):
+    app = partial(np.average, weights=self._get_weights())
+    return self.apply(app, **kwargs)
+
+  def weighted_sum(self, **kwargs):
+    return np.dot(list(self.generate_all_call_return_values(**kwargs)), self._get_weights())
+

@@ -75,3 +75,8 @@ if __name__ == '__main__':
   print(e4(model='b', y=4))
 
   print(e4.mean(x=2, y=3))
+
+  e5 = Ensemble('e5', model_fns=[a, b], weights=[3.0, 1.0]) 
+  print(e5.weighted_mean(x=2, y=3))
+  print(e5.weighted_sum(x=2, y=3))
+
