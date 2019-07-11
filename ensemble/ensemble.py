@@ -102,5 +102,6 @@ class Ensemble(object):
     return self.apply(app, **kwargs)
 
   def weighted_sum(self, **kwargs):
-    return np.dot(self.get_all_call_return_values(**kwargs), self._get_weights())
+    app = lambda values: np.dot(values, self._get_weights())
+    return self.apply(app, **kwargs)
 
