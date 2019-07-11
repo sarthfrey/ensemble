@@ -1,12 +1,14 @@
 import pprint
 import json
 import inspect
+import numpy as np
 from collections import defaultdict
 
 
 class Ensemble(object):
   model_functions = {}
   ensemble_groups = defaultdict(set)
+  arg_names = defaultdict(set)
 
   def __init__(self, name, model_fns=[]):
     self.name = name
@@ -15,6 +17,7 @@ class Ensemble(object):
     for model_function in model_fns:
       self.model_functions[model_function.__name__] = model_function
       self.ensemble_groups[model_function.__name__] |= set([self.name])
+      self.arg_names[model_function.__name__] |= set(inspect.getfullargspec(model_function)[0])
 
   def __call__(self, *args, **kwargs):
     if 'model' not in kwargs:
@@ -27,7 +30,7 @@ class Ensemble(object):
     return model_function(*args, **kwargs)
 
   def __repr__(self):
-    m = ''.join(f'    \'{k}\': {pprint.pformat(v)}\n' for k, v in self.get_models_functions())
+    m = ''.join(f'    \'{k}\': {pprint.pformat(v)}\n' for k, v in self.generate_model_functions())
     return (
       'Ensemble(\n'
       f'  name=\'{self.name}\',\n'
@@ -53,15 +56,27 @@ class Ensemble(object):
         f'Model function `{model_name}` is not attached to ensemble `{self.name}`'
       )
 
-  def get_models_functions(self):
-    return (
-      (n, m) for n, m in self.model_functions.items() if self.name in self.ensemble_groups[n]
-    )
+  def generate_model_functions(self):
+    for model_name, model_function in self.model_functions.items():
+      if self.name in self.ensemble_groups[model_name]:
+        yield model_name, model_function
 
-  def all(self, *args, **kwargs):
-    return_dict = dict()
-    for model_name, model_function in self.get_models_functions():
-      arg_names = inspect.getfullargspec(model_function)[0]
-      filtered_kwargs = {k: v for k, v in kwargs.items() if k in arg_names}
-      return_dict[model_name] = model_function(*args, **filtered_kwargs)
-    return return_dict
+  def generate_all_calls(self, **kwargs):
+    for model_name, model_function in self.generate_model_functions():
+      filtered_kwargs = {k: v for k, v in kwargs.items() if k in self.arg_names[model_name]}
+      yield model_name, model_function(**filtered_kwargs)
+
+  def generate_all_call_return_values(self, **kwargs):
+    return (return_value for _, return_value in self.generate_all_calls(**kwargs))
+
+  def all(self, **kwargs):
+    return {k: v for k, v in self.generate_all_calls(**kwargs)}
+
+  def aggregate(self, agg, **kwargs):
+    return agg(self.generate_all_call_return_values(**kwargs))
+
+  def apply(self, app, **kwargs):
+    return app(list(self.generate_all_call_return_values(**kwargs)))
+
+  def mean(self, **kwargs):
+    return self.apply(np.mean, **kwargs)

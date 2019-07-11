@@ -73,3 +73,5 @@ if __name__ == '__main__':
   e4 = Ensemble('e4', model_fns=[a, b])
   print(e4(model='a', x=4))
   print(e4(model='b', y=4))
+
+  print(e4.mean(x=2, y=3))
