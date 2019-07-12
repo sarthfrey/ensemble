@@ -56,7 +56,7 @@ class Ensemble(object):
 
   @staticmethod
   def _raise_if_invalid_ensemble_kwargs(kwargs):
-    if 'model' not in kwargs:
+    if 'child' not in kwargs:
       raise ValueError('Ensemble object must be called with `model` argument')
 
   @staticmethod
@@ -107,8 +107,8 @@ class Ensemble(object):
 
   def call(self, *args, **kwargs):
     Ensemble._raise_if_invalid_ensemble_kwargs(kwargs)
-    child_model_name = kwargs.get('model')
-    kwargs.pop('model', None)
+    child_model_name = kwargs.get('child')
+    kwargs.pop('child', None)
     Ensemble._raise_if_model_not_found(child_model_name)
     self._raise_if_model_not_in_ensemble(child_model_name)
     child_model_function = self.children[child_model_name]

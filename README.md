@@ -12,10 +12,10 @@ Define your model functions and create your ensemble:
 
 ```python
 >>> from ensemble import Ensemble
->>> def function1(x):
+>>> def square(x):
 ...     return x**2
 ...
->>> def function2(y):
+>>> def cube(y):
 ...     return y**3
 ...
 >>> my_ensemble = Ensemble(
@@ -27,17 +27,17 @@ Define your model functions and create your ensemble:
 Multiplex between functions:
 
 ```python
->>> my_ensemble(model='function1', x=2)
+>>> my_ensemble(child='square', x=2)
 4
->>> my_ensemble(model='function2', y=2)
+>>> my_ensemble(child='cube', y=2)
 8
 ```
 
 Call all the models in the ensemble:
 
 ```python
->>> my_ensemble.all(x=4, y=3)
-{'function1': 16, 'function2': 27}
+>>> my_ensemble.all(x=2, y=2)
+{'square': 4, 'cube': 8}
 ```
 
 You may instead decorate your model functions with `@model` in order to attach them to an ensemble:

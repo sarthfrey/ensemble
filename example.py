@@ -33,24 +33,24 @@ if __name__ == '__main__':
   e2 = Ensemble('e2')
 
   # you may use the ensembles as long as you specify which model you use
-  print(e1(model='f', x=2))
-  print(e1(model='g', y=3))
-  print(e2(model='f', x=2))
+  print(e1(child='f', x=2))
+  print(e1(child='g', y=3))
+  print(e2(child='f', x=2))
 
   # try to use model `g` but it's not in ensemble `e2`
   try:
-    print(e2(model='g', y=3))
+    print(e2(child='g', y=3))
   except ValueError:
     pass
 
   # try to use model `h` but it's not decorated with @model
   try:
-    print(e1(model='h', y=3))
+    print(e1(child='h', y=3))
   except ValueError:
     pass
 
   # you may specify your arguments positionally as usual
-  print(e1(3, model='f'))
+  print(e1(3, child='f'))
 
   # you may call your functions normally
   print(f(1))
@@ -74,8 +74,8 @@ if __name__ == '__main__':
 
   # you may directly specify model functions to the ensemble
   e4 = Ensemble('e4', children=[a, b])
-  print(e4(model='a', x=4))
-  print(e4(model='b', y=4))
+  print(e4(child='a', x=4))
+  print(e4(child='b', y=4))
 
   print(e4.mean(x=2, y=3))
 
