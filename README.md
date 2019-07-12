@@ -10,7 +10,7 @@
 
 Define your model functions and create your ensemble:
 
-```
+```python
 >>> from ensemble import Ensemble
 >>> def function1(x):
 ...     return x**2
@@ -26,7 +26,7 @@ Define your model functions and create your ensemble:
 
 Multiplex between functions:
 
-```
+```python
 >>> my_ensemble(model='function1', x=2)
 4
 >>> my_ensemble(model='function2', y=2)
@@ -35,14 +35,14 @@ Multiplex between functions:
 
 Call all the models in the ensemble:
 
-```
+```python
 >>> my_ensemble.all(x=4, y=3)
 {'function1': 16, 'function2': 27}
 ```
 
 You may instead decorate your model functions with `@model` in order to attach them to an ensemble:
 
-```
+```python
 >>> from ensemble import child
 >>> @child('e2')
 ... def func1(x):
@@ -59,7 +59,7 @@ You may instead decorate your model functions with `@model` in order to attach t
 
 You may even attach a model to multiple ensembles! (this is one main reason *ensemble* is useful)
 
-```
+```python
 >>> @child('e2', 'e3')
 ... def func3(x, y):
 ...     return x**3 + y
@@ -74,7 +74,7 @@ You may even attach a model to multiple ensembles! (this is one main reason *ens
 
 If you forget what models are in your ensemble, just check:
 
-```
+```python
 >>> e2
 Ensemble(
   name='e2',
@@ -82,14 +82,16 @@ Ensemble(
     'func1': <function func1 at 0x1024fa9d8>
     'func2': <function func2 at 0x1024faa60>
     'func3': <function func3 at 0x1024fa950>
-  }
+  },
+  weights=None,
 )
 >>> e3
 Ensemble(
   name='e3',
   children={
     'func3': <function func3 at 0x1024fa950>
-  }
+  },
+  weights=None,
 )
 ```
 
