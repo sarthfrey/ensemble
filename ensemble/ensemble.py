@@ -16,15 +16,11 @@ class Ensemble(object):
 
   def __init__(self, name, model_fns=[], weights=None):
     self.name = name
-    self.children = dict()
     Ensemble._raise_if_invalid_ensemble_name(name)
     Ensemble._raise_if_invalid_weights(weights, model_fns)
     Ensemble.ensembles[self.name] = self
-    for i, model_function in enumerate(model_fns):
-      weight = None if weights is None else weights[i]
-      Ensemble.add_model(model_function, self.name, weight)
-    for model_name, model_function in self.generate_children():
-      self.children[model_name] = model_function
+    self._add_models(model_fns, weights)
+    self.children = self._get_children()
 
   def __call__(self, *args, **kwargs):
     self.call(*args, **kwargs)
@@ -87,6 +83,16 @@ class Ensemble(object):
   def _get_weights(self):
     return list(Ensemble.weights[self.name].values()) if Ensemble.weights[self.name] else None
 
+  def _get_children(self):
+    return {
+      name: func for name, func in Ensemble.model_functions.items() if self.name in Ensemble.ensemble_groups[name]
+    }
+
+  def _add_models(self, model_functions, weights):
+    for i, model_function in enumerate(model_functions):
+      weight = None if weights is None else weights[i]
+      Ensemble.add_model(model_function, self.name, weight)
+
   def call(self, *args, **kwargs):
     Ensemble._raise_if_invalid_ensemble_kwargs(kwargs)
     child_model_name = kwargs.get('model')
@@ -97,9 +103,8 @@ class Ensemble(object):
     return child_model_function(*args, **kwargs)
 
   def generate_children(self):
-    for model_name, model_function in Ensemble.model_functions.items():
-      if self.name in Ensemble.ensemble_groups[model_name]:
-        yield model_name, model_function
+    for model_name, model_function in self.children.items():
+      yield model_name, model_function
 
   def generate_all_calls(self, **kwargs):
     for model_name, model_function in self.generate_children():
@@ -134,4 +139,3 @@ class Ensemble(object):
   def weighted_sum(self, **kwargs):
     app = lambda values: np.dot(values, self._get_weights())
     return self.apply(app, **kwargs)
-
