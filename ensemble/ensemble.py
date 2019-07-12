@@ -14,26 +14,28 @@ class Ensemble(object):
   ensembles = dict()                  # ensemble_name -> ensemble
   weights = defaultdict(dict)         # ensemble_name -> model_name -> weight
 
-  def __init__(self, name, model_fns=[], weights=None):
+  def __init__(self, name, children=[], weights=None):
     self.name = name
-    self.weights = weights
     Ensemble._raise_if_invalid_ensemble_name(name)
-    Ensemble._raise_if_invalid_weights(weights, model_fns)
+    Ensemble._raise_if_invalid_weights(weights, children)
     Ensemble.ensembles[self.name] = self
-    self._add_models(model_fns, weights)
+    self._add_models(children, weights)
+    self.weights = self._get_weights()
     self.children = self._get_children()
 
   def __call__(self, *args, **kwargs):
     return self.call(*args, **kwargs)
 
   def __repr__(self):
-    m = ''.join(f'    \'{k}\': {pprint.pformat(v)}\n' for k, v in self.generate_children())
+    m = ''.join(f'    \'{k}\': {pprint.pformat(v)},\n' for k, v in self.generate_children())
+    w = None if self.get_weights() is None else '[\n' + ''.join(f'    \'{weight}\',\n' for weight in self.get_weights()) + '  ]'
     return (
       'Ensemble(\n'
       f'  name=\'{self.name}\',\n'
-      '  model_functions={\n'
+      '  children={\n'
       f'{m}'
-      '  }\n'
+      '  },\n'
+      f'  weights={w},\n'
       ')'
     )
 
@@ -89,24 +91,27 @@ class Ensemble(object):
       name: func for name, func in Ensemble.model_functions.items() if self.name in Ensemble.ensemble_groups[name]
     }
 
-  def get_weights(self):
-    return self.weights
-
-  def get_children(self):
-    return self.children
-
   def _add_models(self, model_functions, weights):
     for i, model_function in enumerate(model_functions):
       weight = None if weights is None else weights[i]
       Ensemble.add_model(model_function, self.name, weight)
 
+  def get_weights(self):
+    return self.weights
+
+  def set_weights(self, weights):
+    self.weights = weights
+
+  def get_children(self):
+    return self.children
+
   def call(self, *args, **kwargs):
     Ensemble._raise_if_invalid_ensemble_kwargs(kwargs)
     child_model_name = kwargs.get('model')
+    kwargs.pop('model', None)
     Ensemble._raise_if_model_not_found(child_model_name)
     self._raise_if_model_not_in_ensemble(child_model_name)
     child_model_function = self.children[child_model_name]
-    kwargs.pop('model', None)
     return child_model_function(*args, **kwargs)
 
   def generate_children(self):
@@ -128,21 +133,21 @@ class Ensemble(object):
     return {k: v for k, v in self.generate_all_calls(**kwargs)}
 
   def aggregate(self, agg, **kwargs):
-    return agg(self.generate_all_call_return_values(**kwargs))
-
-  def apply(self, app, **kwargs):
-    return app(self.get_all_call_return_values(**kwargs))
+    return agg(self.get_all_call_return_values(**kwargs))
 
   def mean(self, **kwargs):
-    return self.apply(np.mean, **kwargs)
+    return self.aggregate(np.mean, **kwargs)
 
   def sum(self, **kwargs):
-    return self.apply(np.sum, **kwargs)
+    return self.aggregate(np.sum, **kwargs)
 
   def weighted_mean(self, **kwargs):
-    app = partial(np.average, weights=self._get_weights())
-    return self.apply(app, **kwargs)
+    agg = partial(np.average, weights=self._get_weights())
+    return self.aggregate(agg, **kwargs)
 
   def weighted_sum(self, **kwargs):
-    app = lambda values: np.dot(values, self._get_weights())
-    return self.apply(app, **kwargs)
+    agg = lambda values: np.dot(values, self._get_weights())
+    return self.aggregate(agg, **kwargs)
+
+  def vote(self, **kwargs):
+    return self.aggregate(np.bincount, **kwargs).argmax()

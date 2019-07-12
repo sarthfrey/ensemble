@@ -2,9 +2,9 @@
 
 *A model ensemble utility optimized for low barrier integration*
 
-![Model Ensemble](https://www.opendoor.com/w/wp-content/uploads/2018/11/the-intuition-behind-opendoor-home-pricing.png)
-
 **TL;DR** this lets you use one thing to call many things.
+
+![Model Ensemble](https://www.opendoor.com/w/wp-content/uploads/2018/11/the-intuition-behind-opendoor-home-pricing.png)
 
 ### Examples
 
@@ -20,7 +20,7 @@ Define your model functions and create your ensemble:
 ...
 >>> my_ensemble = Ensemble(
 ...     name='e1',
-...     model_fns=[function1, function2],
+...     children=[function1, function2],
 ... )
 ```
 
@@ -43,12 +43,12 @@ Call all the models in the ensemble:
 You may instead decorate your model functions with `@model` in order to attach them to an ensemble:
 
 ```
->>> from ensemble import model
->>> @model('e2')
+>>> from ensemble import child
+>>> @child('e2')
 ... def func1(x):
 ...     return x**2
 ...
->>> @model('e2')
+>>> @child('e2')
 ... def func2(x):
 ...     return x**3
 ...
@@ -57,10 +57,10 @@ You may instead decorate your model functions with `@model` in order to attach t
 {'func1': 9, 'func2': 27}
 ```
 
-You may even attach a model function to multiple ensembles!
+You may even attach a model to multiple ensembles! (this is one main reason *ensemble* is useful)
 
 ```
->>> @model('e2', 'e3')
+>>> @child('e2', 'e3')
 ... def func3(x, y):
 ...     return x**3 + y
 ...
@@ -72,13 +72,13 @@ You may even attach a model function to multiple ensembles!
 {'func3': 11}
 ```
 
-If you forget what models are in your ensemble, just check!
+If you forget what models are in your ensemble, just check:
 
 ```
 >>> e2
 Ensemble(
   name='e2',
-  model_functions={
+  children={
     'func1': <function func1 at 0x1024fa9d8>
     'func2': <function func2 at 0x1024faa60>
     'func3': <function func3 at 0x1024fa950>
@@ -87,7 +87,7 @@ Ensemble(
 >>> e3
 Ensemble(
   name='e3',
-  model_functions={
+  children={
     'func3': <function func3 at 0x1024fa950>
   }
 )

@@ -1,2 +1,2 @@
 from .ensemble import Ensemble
-from .model import model
+from .model import child

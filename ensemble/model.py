@@ -30,7 +30,7 @@ class _Model(Ensemble):
           f'and so it may not have `{invalid_arg_name}` as an argument'
         )
 
-def model(*ensemble_names):
+def child(*ensemble_names):
   def wrapper(model_function):
     return _Model(model_function, *ensemble_names)
   return wrapper
