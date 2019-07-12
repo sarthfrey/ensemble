@@ -4,7 +4,7 @@
 
 **TL;DR** this lets you use one thing to call many things.
 
-![Model Ensemble](https://www.opendoor.com/w/wp-content/uploads/2018/11/the-intuition-behind-opendoor-home-pricing.png)
+![Model Ensemble](img.png)
 
 ### Examples
 
