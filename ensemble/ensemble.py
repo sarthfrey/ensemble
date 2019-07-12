@@ -28,7 +28,10 @@ class Ensemble(object):
 
   def __repr__(self):
     m = ''.join(f'    \'{k}\': {pprint.pformat(v)},\n' for k, v in self.generate_children())
-    w = None if self.get_weights() is None else '[\n' + ''.join(f'    \'{weight}\',\n' for weight in self.get_weights()) + '  ]'
+    if self.get_weights() is None:
+      w = None
+    else:
+      w = '[\n' + ''.join(f'    \'{weight}\',\n' for weight in self.get_weights()) + '  ]'
     return (
       'Ensemble(\n'
       f'  name=\'{self.name}\',\n'
