@@ -16,6 +16,7 @@ class Ensemble(object):
 
   def __init__(self, name, model_fns=[], weights=None):
     self.name = name
+    self.weights = weights
     Ensemble._raise_if_invalid_ensemble_name(name)
     Ensemble._raise_if_invalid_weights(weights, model_fns)
     Ensemble.ensembles[self.name] = self
@@ -23,7 +24,7 @@ class Ensemble(object):
     self.children = self._get_children()
 
   def __call__(self, *args, **kwargs):
-    self.call(*args, **kwargs)
+    return self.call(*args, **kwargs)
 
   def __repr__(self):
     m = ''.join(f'    \'{k}\': {pprint.pformat(v)}\n' for k, v in self.generate_children())
@@ -87,6 +88,12 @@ class Ensemble(object):
     return {
       name: func for name, func in Ensemble.model_functions.items() if self.name in Ensemble.ensemble_groups[name]
     }
+
+  def get_weights(self):
+    return self.weights
+
+  def get_children(self):
+    return self.children
 
   def _add_models(self, model_functions, weights):
     for i, model_function in enumerate(model_functions):
