@@ -28,9 +28,9 @@ def i3(x, y):
 if __name__ == '__main__':
 
   # create our first ensemble and give it a name
-  e1 = Ensemble('e1')
+  e1 = Ensemble('e1', mode='multiplex')
   # create a second ensemble
-  e2 = Ensemble('e2')
+  e2 = Ensemble('e2', mode='multiplex')
 
   # you may use the ensembles as long as you specify which model you use
   print(e1(child='f', x=2))
@@ -61,7 +61,7 @@ if __name__ == '__main__':
 
   # send the same arguments to all the models in the ensemble and get all results
   e3 = Ensemble('e3')
-  print(e3.all(x=2, y=3))
+  print(e3(x=2, y=3))
 
   def a(x):
     return x + 1
@@ -73,7 +73,7 @@ if __name__ == '__main__':
     return z + 2
 
   # you may directly specify model functions to the ensemble
-  e4 = Ensemble('e4', children=[a, b])
+  e4 = Ensemble('e4', children=[a, b], mode='multiplex')
   print(e4(child='a', x=4))
   print(e4(child='b', y=4))
 
@@ -86,5 +86,12 @@ if __name__ == '__main__':
 
   e6 = Ensemble('e6', [a, b, c])
   print(e6.vote(x=1, y=1, z=1))
+
+  e7 = Ensemble('e7', children=[c])
+
+  e8 = Ensemble('e8', children=[e4, e7], mode='all')
+  e4.set_mode('all')
+  e7.set_mode('all')
+  print(e8(x=1, y=1, z=1))
 
 

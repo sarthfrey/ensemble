@@ -9,16 +9,25 @@ from .model import Model
 
 
 class Ensemble(Node):
+  MODES = {
+    'multiplex',
+    'all',
+    'aggregate',
+    'sum',
+    'mean',
+  }
+  DEFAULT_MODE = 'all'
 
-  def __init__(self, name, children=[], weights=None):
-    Ensemble._raise_if_invalid_init(name, children, weights)
+  def __init__(self, name, children=[], weights=None, mode=DEFAULT_MODE):
+    Ensemble._raise_if_invalid_init(name, children, weights, mode)
     self.name = name
+    self.mode = mode
     self._init_to_graph(children, weights)
     self.children = Graph._get_children(self.name)
     self.weights = Graph._get_weights(self.name)
 
   def __call__(self, *args, **kwargs):
-    return self.call(*args, **kwargs)
+    return getattr(self, self.get_mode())(*args, **kwargs)
 
   def __repr__(self):
     m = ''.join(f'    \'{k}\': {pprint.pformat(v)},\n' for k, v in self.generate_children())
@@ -48,9 +57,10 @@ class Ensemble(Node):
       Graph.add_node(self.name, child, weight)
 
   @classmethod
-  def _raise_if_invalid_init(cls, name, children, weights):
+  def _raise_if_invalid_init(cls, name, children, weights, mode):
     cls._raise_if_invalid_ensemble_name(name)
     cls._raise_if_invalid_weights(weights, children)
+    cls._raise_if_invalid_mode(mode)
 
   @staticmethod
   def _raise_if_invalid_call_kwargs(kwargs):
@@ -65,6 +75,11 @@ class Ensemble(Node):
   @staticmethod
   def _raise_if_invalid_weights(weights, children):
     if weights is not None and len(weights) != len(children):
+      raise ValueError('Number of weights must be equal to number of child models if weights are specified')
+
+  @classmethod
+  def _raise_if_invalid_mode(cls, mode):
+    if mode not in cls.MODES:
       raise ValueError('Number of weights must be equal to number of child models if weights are specified')
 
   @classmethod
@@ -85,6 +100,13 @@ class Ensemble(Node):
   def get_name(self):
     return self.name
 
+  def get_mode(self):
+    return self.mode
+
+  def set_mode(self, mode):
+    self.mode = mode
+    return self
+
   def get_weights(self):
     return self.weights
 
@@ -94,23 +116,26 @@ class Ensemble(Node):
   def get_children(self):
     return self.children
 
-  def call(self, *args, **kwargs):
+  def multiplex(self, *args, **kwargs):
     Ensemble._raise_if_invalid_call_kwargs(kwargs)
-    child_model_name = kwargs.get('child')
+    child_name = kwargs.get('child')
     kwargs.pop('child', None)
-    Ensemble._raise_if_model_not_found(child_model_name)
-    Ensemble._raise_if_model_not_in_ensemble(self.name, child_model_name)
-    child_model_function = self.children[child_model_name]
-    return child_model_function(*args, **kwargs)
+    Ensemble._raise_if_model_not_found(child_name)
+    Ensemble._raise_if_model_not_in_ensemble(self.name, child_name)
+    child = self.children[child_name]
+    return child(*args, **kwargs)
 
   def generate_children(self):
-    for model_name, model_function in self.children.items():
-      yield model_name, model_function
+    for name, node in self.children.items():
+      yield name, node
 
   def generate_all_calls(self, **kwargs):
     for name, node in self.generate_children():
-      filtered_kwargs = {k: v for k, v in kwargs.items() if k in node.get_arg_names()}
-      yield name, node(**filtered_kwargs)
+      if isinstance(node, self.__class__):
+        yield name, node(**kwargs)
+      else:
+        filtered_kwargs = {k: v for k, v in kwargs.items() if k in node.get_arg_names()}
+        yield name, node(**filtered_kwargs)
 
   def generate_all_call_return_values(self, **kwargs):
     return (return_value for _, return_value in self.generate_all_calls(**kwargs))
