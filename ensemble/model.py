@@ -1,9 +1,10 @@
 import inspect
 
 from .ensemble import Ensemble
+from .node import Node
 
 
-class _Model(Ensemble):
+class Model(Node):
   invalid_args_names = [
     'model',
   ]
@@ -14,8 +15,9 @@ class _Model(Ensemble):
     if any(not ensemble_name for ensemble_name in self.ensemble_names):
       raise ValueError('Must provide a valid ensemble names')
     for ensemble_name in ensemble_names:
-      super().add_model(model_function, ensemble_name)
-    _Model._validate_model_function(model_function)
+      print(super())
+      super().add_model(ensemble_name, model_function)
+    Model._validate_model_function(model_function)
 
   def __call__(self, *args, **kwargs):
     return self.model_function(*args, **kwargs)
@@ -23,7 +25,7 @@ class _Model(Ensemble):
   @staticmethod
   def _validate_model_function(model_function):
     arg_names = inspect.getfullargspec(model_function)[0]
-    for invalid_arg_name in _Model.invalid_args_names:
+    for invalid_arg_name in Model.invalid_args_names:
       if invalid_arg_name in arg_names:
         raise ValueError(
           f'Function `{model_function.__name__}` is decorated with @model '
@@ -32,5 +34,5 @@ class _Model(Ensemble):
 
 def child(*ensemble_names):
   def wrapper(model_function):
-    return _Model(model_function, *ensemble_names)
+    return Model(model_function, *ensemble_names)
   return wrapper

@@ -3,25 +3,18 @@ import json
 import inspect
 import numpy as np
 
-from collections import defaultdict
 from functools import partial
+from .node import Node
 
 
-class Ensemble(object):
-  model_functions = {}                # model_name    -> model
-  arg_names = defaultdict(set)        # model_name    -> arg_names
-  ensemble_groups = defaultdict(set)  # model_name    -> ensemble_names
-  ensembles = dict()                  # ensemble_name -> ensemble
-  weights = defaultdict(dict)         # ensemble_name -> model_name -> weight
+class Ensemble(Node):
 
   def __init__(self, name, children=[], weights=None):
     self.name = name
-    Ensemble._raise_if_invalid_ensemble_name(name)
-    Ensemble._raise_if_invalid_weights(weights, children)
-    Ensemble.ensembles[self.name] = self
-    self._add_models(children, weights)
-    self.weights = self._get_weights()
-    self.children = self._get_children()
+    self._raise_if_invalid_init(name, children, weights)
+    self._init_to_graph(children, weights)
+    self.children = super()._get_children(self.name)
+    self.weights = super()._get_weights(self.name)
 
   def __call__(self, *args, **kwargs):
     return self.call(*args, **kwargs)
@@ -45,20 +38,16 @@ class Ensemble(object):
   def __str__(self):
     return self.__repr__()
 
-  @classmethod
-  def get_by_name(cls, name):
-    return cls.ensembles[name]
+  def _init_to_graph(self, children, weights):
+    super().ensembles[self.name] = self
+    super().add_models(self.name, children, weights)
 
-  @classmethod
-  def add_model(cls, model_function, ensemble_name, weight=None):
-    cls.model_functions[model_function.__name__] = model_function
-    cls.ensemble_groups[model_function.__name__] |= set([ensemble_name])
-    cls.arg_names[model_function.__name__] |= set(inspect.getfullargspec(model_function)[0])
-    if weight is not None:
-      cls.weights[ensemble_name][model_function.__name__] = weight
+  def _raise_if_invalid_init(self, name, children, weights):
+    Ensemble._raise_if_invalid_ensemble_name(name)
+    Ensemble._raise_if_invalid_weights(weights, children)
 
   @staticmethod
-  def _raise_if_invalid_ensemble_kwargs(kwargs):
+  def _raise_if_invalid_call_kwargs(kwargs):
     if 'child' not in kwargs:
       raise ValueError('Ensemble object must be called with `model` argument')
 
@@ -74,30 +63,17 @@ class Ensemble(object):
 
   @classmethod
   def _raise_if_model_not_found(cls, model_name):
-    if model_name not in cls.model_functions or model_name not in cls.ensemble_groups:
+    if model_name not in super().model_functions or model_name not in super().ensemble_groups:
       raise ValueError(
         f'Either there is no decorated model function `{model_name}` or it was not added to the Ensemble'
       )
 
   def _raise_if_model_not_in_ensemble(self, model_name):
-    ensemble_group = self.ensemble_groups[model_name]
+    ensemble_group = super().ensemble_groups[model_name]
     if self.name not in ensemble_group:
       raise ValueError(
         f'Model function `{model_name}` is not attached to ensemble `{self.name}`'
       )
-
-  def _get_weights(self):
-    return list(Ensemble.weights[self.name].values()) if Ensemble.weights[self.name] else None
-
-  def _get_children(self):
-    return {
-      name: func for name, func in Ensemble.model_functions.items() if self.name in Ensemble.ensemble_groups[name]
-    }
-
-  def _add_models(self, model_functions, weights):
-    for i, model_function in enumerate(model_functions):
-      weight = None if weights is None else weights[i]
-      Ensemble.add_model(model_function, self.name, weight)
 
   def get_weights(self):
     return self.weights
@@ -109,7 +85,7 @@ class Ensemble(object):
     return self.children
 
   def call(self, *args, **kwargs):
-    Ensemble._raise_if_invalid_ensemble_kwargs(kwargs)
+    Ensemble._raise_if_invalid_call_kwargs(kwargs)
     child_model_name = kwargs.get('child')
     kwargs.pop('child', None)
     Ensemble._raise_if_model_not_found(child_model_name)
@@ -123,7 +99,7 @@ class Ensemble(object):
 
   def generate_all_calls(self, **kwargs):
     for model_name, model_function in self.generate_children():
-      filtered_kwargs = {k: v for k, v in kwargs.items() if k in Ensemble.arg_names[model_name]}
+      filtered_kwargs = {k: v for k, v in kwargs.items() if k in self.arg_names[model_name]}
       yield model_name, model_function(**filtered_kwargs)
 
   def generate_all_call_return_values(self, **kwargs):
@@ -145,11 +121,11 @@ class Ensemble(object):
     return self.aggregate(np.sum, **kwargs)
 
   def weighted_mean(self, **kwargs):
-    agg = partial(np.average, weights=self._get_weights())
+    agg = partial(np.average, weights=self.weights)
     return self.aggregate(agg, **kwargs)
 
   def weighted_sum(self, **kwargs):
-    agg = lambda values: np.dot(values, self._get_weights())
+    agg = lambda values: np.dot(values, self.weights)
     return self.aggregate(agg, **kwargs)
 
   def vote(self, **kwargs):
