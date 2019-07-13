@@ -1,11 +1,11 @@
 import pprint
 import json
-import inspect
 import numpy as np
 
 from functools import partial
 from .node import Node
 from .graph import Graph
+from .model import Model
 
 
 class Ensemble(Node):
@@ -40,8 +40,12 @@ class Ensemble(Node):
     return self.__repr__()
 
   def _init_to_graph(self, children, weights):
-    Graph.ensembles[self.name] = self
-    Graph.add_models(self.name, children, weights)
+    # Graph.ensembles[self.name] = self
+    for i, child in enumerate(children):
+      weight = None if weights is None else weights[i]
+      if callable(child) and not isinstance(child, Ensemble):
+        child = Model(child, self.name)
+      Graph.add_node(self.name, child, weight)
 
   @classmethod
   def _raise_if_invalid_init(cls, name, children, weights):
@@ -65,7 +69,7 @@ class Ensemble(Node):
 
   @classmethod
   def _raise_if_model_not_found(cls, model_name):
-    if model_name not in Graph.model_functions or model_name not in Graph.ensemble_groups:
+    if model_name not in Graph.nodes or model_name not in Graph.nodes:
       raise ValueError(
         f'Either there is no decorated model function `{model_name}` or it was not added to the Ensemble'
       )
@@ -104,9 +108,9 @@ class Ensemble(Node):
       yield model_name, model_function
 
   def generate_all_calls(self, **kwargs):
-    for model_name, model_function in self.generate_children():
-      filtered_kwargs = {k: v for k, v in kwargs.items() if k in Graph.arg_names[model_name]}
-      yield model_name, model_function(**filtered_kwargs)
+    for name, node in self.generate_children():
+      filtered_kwargs = {k: v for k, v in kwargs.items() if k in node.get_arg_names()}
+      yield name, node(**filtered_kwargs)
 
   def generate_all_call_return_values(self, **kwargs):
     return (return_value for _, return_value in self.generate_all_calls(**kwargs))

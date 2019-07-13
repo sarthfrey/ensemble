@@ -1,6 +1,5 @@
 import inspect
 
-from .ensemble import Ensemble
 from .node import Node
 from .graph import Graph
 
@@ -14,10 +13,11 @@ class Model(Node):
     self.name = model_function.__name__
     self.model_function = model_function
     self.ensemble_names = set(ensemble_names)
+    self.arg_names = set(inspect.getfullargspec(model_function)[0])
     if any(not ensemble_name for ensemble_name in self.ensemble_names):
       raise ValueError('Must provide a valid ensemble names')
     for ensemble_name in ensemble_names:
-      Graph.add_model(ensemble_name, model_function)
+      Graph.add_node(ensemble_name, self)
     Model._validate_model_function(model_function)
 
   def __call__(self, *args, **kwargs):
@@ -33,6 +33,9 @@ class Model(Node):
 
   def get_name(self):
     return self.name
+
+  def get_arg_names(self):
+    return self.arg_names
 
   @staticmethod
   def _validate_model_function(model_function):

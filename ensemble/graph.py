@@ -1,36 +1,31 @@
 import inspect
 
 from collections import defaultdict
+from .node import Node
 
 
 class Graph:
-  model_functions = {}                # model_name    -> model
+  nodes = {}                          # node_name     -> Node()
   arg_names = defaultdict(set)        # model_name    -> arg_names
   ensemble_groups = defaultdict(set)  # model_name    -> ensemble_names
-  ensembles = dict()                  # ensemble_name -> ensemble
+  #ensembles = dict()                 # ensemble_name -> ensemble
   weight_map = defaultdict(dict)      # ensemble_name -> model_name -> weight
 
   def __init__(self, *args, **kwargs):
     raise NotImplementedError('You may not instantiate the Graph class')
 
   @classmethod
-  def add_model(cls, ensemble_name, model_function, weight=None):
-    cls.model_functions[model_function.__name__] = model_function
-    cls.ensemble_groups[model_function.__name__] |= set([ensemble_name])
-    cls.arg_names[model_function.__name__] |= set(inspect.getfullargspec(model_function)[0])
+  def add_node(cls, ensemble_name, node, weight=None):
+    assert isinstance(node, Node)
+    cls.nodes[node.get_name()] = node
+    cls.ensemble_groups[node.get_name()] |= set([ensemble_name])
     if weight is not None:
-      cls.weight_map[ensemble_name][model_function.__name__] = weight
-
-  @classmethod
-  def add_models(cls, ensemble_name, model_functions, weights):
-    for i, model_function in enumerate(model_functions):
-      weight = None if weights is None else weights[i]
-      cls.add_model(ensemble_name, model_function, weight)
+      cls.weight_map[ensemble_name][node.get_name()] = weight
 
   @classmethod
   def _get_children(cls, ensemble_name):
     return {
-      name: func for name, func in cls.model_functions.items() if ensemble_name in cls.ensemble_groups[name]
+      node_name: node for node_name, node in cls.nodes.items() if ensemble_name in cls.ensemble_groups[node_name]
     }
 
   @classmethod
