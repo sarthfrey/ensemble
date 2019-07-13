@@ -5,16 +5,17 @@ import numpy as np
 
 from functools import partial
 from .node import Node
+from .graph import Graph
 
 
 class Ensemble(Node):
 
   def __init__(self, name, children=[], weights=None):
+    Ensemble._raise_if_invalid_init(name, children, weights)
     self.name = name
-    self._raise_if_invalid_init(name, children, weights)
     self._init_to_graph(children, weights)
-    self.children = super()._get_children(self.name)
-    self.weights = super()._get_weights(self.name)
+    self.children = Graph._get_children(self.name)
+    self.weights = Graph._get_weights(self.name)
 
   def __call__(self, *args, **kwargs):
     return self.call(*args, **kwargs)
@@ -39,12 +40,13 @@ class Ensemble(Node):
     return self.__repr__()
 
   def _init_to_graph(self, children, weights):
-    super().ensembles[self.name] = self
-    super().add_models(self.name, children, weights)
+    Graph.ensembles[self.name] = self
+    Graph.add_models(self.name, children, weights)
 
-  def _raise_if_invalid_init(self, name, children, weights):
-    Ensemble._raise_if_invalid_ensemble_name(name)
-    Ensemble._raise_if_invalid_weights(weights, children)
+  @classmethod
+  def _raise_if_invalid_init(cls, name, children, weights):
+    cls._raise_if_invalid_ensemble_name(name)
+    cls._raise_if_invalid_weights(weights, children)
 
   @staticmethod
   def _raise_if_invalid_call_kwargs(kwargs):
@@ -63,17 +65,21 @@ class Ensemble(Node):
 
   @classmethod
   def _raise_if_model_not_found(cls, model_name):
-    if model_name not in super().model_functions or model_name not in super().ensemble_groups:
+    if model_name not in Graph.model_functions or model_name not in Graph.ensemble_groups:
       raise ValueError(
         f'Either there is no decorated model function `{model_name}` or it was not added to the Ensemble'
       )
 
-  def _raise_if_model_not_in_ensemble(self, model_name):
-    ensemble_group = super().ensemble_groups[model_name]
-    if self.name not in ensemble_group:
+  @staticmethod
+  def _raise_if_model_not_in_ensemble(ensemble_name, model_name):
+    ensemble_group = Graph.ensemble_groups[model_name]
+    if ensemble_name not in ensemble_group:
       raise ValueError(
-        f'Model function `{model_name}` is not attached to ensemble `{self.name}`'
+        f'Model function `{model_name}` is not attached to ensemble `{ensemble_name}`'
       )
+
+  def get_name(self):
+    return self.name
 
   def get_weights(self):
     return self.weights
@@ -89,7 +95,7 @@ class Ensemble(Node):
     child_model_name = kwargs.get('child')
     kwargs.pop('child', None)
     Ensemble._raise_if_model_not_found(child_model_name)
-    self._raise_if_model_not_in_ensemble(child_model_name)
+    Ensemble._raise_if_model_not_in_ensemble(self.name, child_model_name)
     child_model_function = self.children[child_model_name]
     return child_model_function(*args, **kwargs)
 
@@ -99,7 +105,7 @@ class Ensemble(Node):
 
   def generate_all_calls(self, **kwargs):
     for model_name, model_function in self.generate_children():
-      filtered_kwargs = {k: v for k, v in kwargs.items() if k in self.arg_names[model_name]}
+      filtered_kwargs = {k: v for k, v in kwargs.items() if k in Graph.arg_names[model_name]}
       yield model_name, model_function(**filtered_kwargs)
 
   def generate_all_call_return_values(self, **kwargs):
