@@ -21,6 +21,9 @@ class Node(ABC):
   def get_name(self):
     pass
 
+  def get_arg_names(self):
+    return set(inspect.getfullargspec(self)[0])
+
 """
   @abstractmethod
   def set_name(self, name):

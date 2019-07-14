@@ -50,8 +50,11 @@ if __name__ == '__main__':
     pass
 
   # you may specify your arguments positionally as usual
-  print(e1(3, child='f'))
-
+  try:
+    print(e1(3, child='f'))
+  except ValueError:
+    pass
+    
   # you may call your functions normally
   print(f(1))
   print(g(1))
@@ -93,5 +96,8 @@ if __name__ == '__main__':
   e4.set_mode('all')
   e7.set_mode('all')
   print(e8(x=1, y=1, z=1))
+
+  e = Ensemble('ab', [a, b])
+  print(e(x=1, y=1  ))
 
 

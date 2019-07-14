@@ -26,8 +26,11 @@ class Ensemble(Node):
     self.children = Graph._get_children(self.name)
     self.weights = Graph._get_weights(self.name)
 
-  def __call__(self, *args, **kwargs):
-    return getattr(self, self.get_mode())(*args, **kwargs)
+  def __call__(self, arg_dict={}, *args, **kwargs):
+    if args or not isinstance(arg_dict, dict):
+      raise ValueError('The only positional argument you may pass to Ensemble is arg_dict')
+    new_arg_dict = {**kwargs, **arg_dict}
+    return getattr(self, self.get_mode())(**new_arg_dict)
 
   def __repr__(self):
     m = ''.join(f'    \'{k}\': {pprint.pformat(v)},\n' for k, v in self.generate_children())
@@ -55,6 +58,8 @@ class Ensemble(Node):
       if callable(child) and not isinstance(child, Ensemble):
         child = Model(child, self.name)
       Graph.add_node(self.name, child, weight)
+
+  # error helpers
 
   @classmethod
   def _raise_if_invalid_init(cls, name, children, weights, mode):
@@ -97,6 +102,8 @@ class Ensemble(Node):
         f'Model function `{model_name}` is not attached to ensemble `{ensemble_name}`'
       )
 
+  # properties
+
   def get_name(self):
     return self.name
 
@@ -116,14 +123,7 @@ class Ensemble(Node):
   def get_children(self):
     return self.children
 
-  def multiplex(self, *args, **kwargs):
-    Ensemble._raise_if_invalid_call_kwargs(kwargs)
-    child_name = kwargs.get('child')
-    kwargs.pop('child', None)
-    Ensemble._raise_if_model_not_found(child_name)
-    Ensemble._raise_if_model_not_in_ensemble(self.name, child_name)
-    child = self.children[child_name]
-    return child(*args, **kwargs)
+  # child polling helpers
 
   def generate_children(self):
     for name, node in self.children.items():
@@ -142,6 +142,15 @@ class Ensemble(Node):
 
   def get_all_call_return_values(self, **kwargs):
     return list(self.generate_all_call_return_values(**kwargs))
+
+  def multiplex(self, **kwargs):
+    Ensemble._raise_if_invalid_call_kwargs(kwargs)
+    child_name = kwargs.get('child')
+    kwargs.pop('child', None)
+    Ensemble._raise_if_model_not_found(child_name)
+    Ensemble._raise_if_model_not_in_ensemble(self.name, child_name)
+    child = self.children[child_name]
+    return child(**kwargs)
 
   def all(self, **kwargs):
     return {k: v for k, v in self.generate_all_calls(**kwargs)}
