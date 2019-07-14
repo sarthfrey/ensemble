@@ -2,15 +2,13 @@
 
 ![Model Ensemble](img.png)
 
-[![Documentation Status](https://readthedocs.org/projects/ensemble-pkg/badge/?version=latest)](https://ensemble-pkg.readthedocs.io/en/latest/?badge=latest)
-
-### Summary
-
 *A model ensemble package optimized for low barrier integration*
 
 *ensemble* lets you combine your models and access them by a single object, called an ensemble. You may use that ensemble to multiplex between your models, call them all, and aggregate the results. You may even create ensembles of ensembles. *ensemble* borrows the idea of computation graph sessioning from *tensorflow* and implements the composite pattern for building tree hierarchies.
 
 ### Installation
+
+[![Documentation Status](https://readthedocs.org/projects/ensemble-pkg/badge/?version=latest)](https://ensemble-pkg.readthedocs.io/en/latest/?badge=latest)
 
 ```
 pip install ensemble-pkg
