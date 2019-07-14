@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
   name="ensemble-pkg",
-  version="0.0.1",
+  version="0.0.2",
   author="sarthfrey",
   author_email="sarth.frey@gmail.com",
   description="Build deployable model ensembles without refactoring your code.",
@@ -25,5 +25,8 @@ setuptools.setup(
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Topic :: Software Development :: Version Control :: Git",
     "Typing :: Typed",
+  ],
+  install_requires=[
+    "numpy>=1.0.0",
   ],
 )
