@@ -4,9 +4,9 @@
 
 *A model ensemble package optimized for low barrier integration*
 
-**ensemble** lets you combine your models and access them by a single object, called an ensemble. You may use that ensemble to multiplex between your models, call them all, and aggregate the results. You may even create ensembles of ensembles. 
+**ensemble** lets you combine your models and access them by a single object, called an ensemble. You may use that ensemble to multiplex between your models, call them all, and aggregate the results. You may even create ensembles of ensembles!
 
-This package borrows the idea of computation graph sessioning from *tensorflow* and implements the composite pattern for building tree hierarchies.
+This package borrows the idea of computation graph sessioning from [TensorFlow](https://github.com/tensorflow/tensorflow) and implements the composite pattern for building tree hierarchies.
 
 ### Documentation
 
