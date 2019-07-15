@@ -9,6 +9,15 @@ from .model import Model
 
 
 class Ensemble(Node):
+  """
+  A user created :class:`Ensemble <Ensemble>` object that can
+  multiplex children, call all of them, and aggregate results.
+
+  :param name: required `str` to identify the ensemble to its :class:`Graph <Graph>`
+  :param children: optional `list` of :class:`Node <Graph>` objects
+  :param weights: optional `list` of `float` objects per child
+  :param mode: optional `str` that specifies what the ensemble does when it is called
+  """
   MODES = {
     'multiplex',
     'all',
@@ -29,8 +38,7 @@ class Ensemble(Node):
   def __call__(self, arg_dict={}, *args, **kwargs):
     if args or not isinstance(arg_dict, dict):
       raise ValueError('The only positional argument you may pass to Ensemble is arg_dict')
-    new_arg_dict = {**kwargs, **arg_dict}
-    return getattr(self, self.get_mode())(**new_arg_dict)
+    return getattr(self, self.get_mode())(arg_dict, **new_arg_dict)
 
   def __repr__(self):
     m = ''.join(f'    \'{k}\': {pprint.pformat(v)},\n' for k, v in self.generate_children())
@@ -143,6 +151,8 @@ class Ensemble(Node):
   def get_all_call_return_values(self, **kwargs):
     return list(self.generate_all_call_return_values(**kwargs))
 
+  # main callers
+
   def multiplex(self, **kwargs):
     Ensemble._raise_if_invalid_call_kwargs(kwargs)
     child_name = kwargs.get('child')
@@ -163,6 +173,8 @@ class Ensemble(Node):
 
   def sum(self, **kwargs):
     return self.aggregate(np.sum, **kwargs)
+
+  # other callers
 
   def weighted_mean(self, **kwargs):
     agg = partial(np.average, weights=self.weights)

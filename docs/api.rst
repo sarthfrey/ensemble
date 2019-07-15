@@ -17,3 +17,6 @@ All of ensemble's functionality can be accessed by these objects.
 
 .. autoclass:: ensemble.Ensemble
 .. autofunction:: ensemble.child
+.. autoclass:: ensemble.model.Model
+.. autoclass:: ensemble.graph.Graph
+.. autoclass:: ensemble.node.Node

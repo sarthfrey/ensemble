@@ -53,7 +53,7 @@ def child(*ensemble_names):
 
   :param ensemble_names: an unpacked list of ensemble names to attach the model to
   :return: a wrapper function that decorates the function as model
-  :rtype: ensemble.model.Model
+  :rtype: :class:`Model <Model>` object
   """
   def wrapper(model_function):
     return Model(model_function, *ensemble_names)
