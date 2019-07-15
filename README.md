@@ -1,8 +1,8 @@
 # ensemble
 
-![Model Ensemble](img.png)
-
 *A model ensemble package optimized for low barrier integration*
+
+![Model Ensemble](img.png)
 
 **ensemble** lets you combine your models and access them by a single object, called an ensemble. You may use that ensemble to multiplex between your models, call them all, and aggregate the results. You may even create ensembles of ensembles!
 
