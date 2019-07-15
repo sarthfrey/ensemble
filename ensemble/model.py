@@ -48,6 +48,17 @@ class Model(Node):
         )
 
 def child(*ensemble_names):
+  """
+  child(*ensemble_names) is a decorator used to decorate model functions and add them to ensembles
+
+  ex:
+
+    @child('e1')
+    def square(x):
+      return x**2
+
+    assert Ensemble('e1').multiplex('square', x=4) == 16
+  """
   def wrapper(model_function):
     return Model(model_function, *ensemble_names)
   return wrapper
