@@ -43,6 +43,12 @@ Look how easy it is to use:
     # call square from the ensemble
     e.multiplex('square', x=2) # returns 4
 
+Installation
+------------
+
+Install ensemble by running::
+
+    pip install ensemble-pkg
 
 Features
 --------
@@ -53,12 +59,16 @@ Features
 - Aggregate model results
 - Do weighted sums, means, votes, and more
 
-Installation
-------------
+The API Documentation / Guide
+-----------------------------
 
-Install ensemble by running::
+If you are looking for information on a specific function, class, or method,
+this part of the documentation is for you.
 
-    pip install ensemble-pkg
+.. toctree::
+   :maxdepth: 2
+
+   api
 
 Contribute
 ----------
