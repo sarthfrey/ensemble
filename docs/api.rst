@@ -15,5 +15,5 @@ Main Interface
 
 All of ensemble's functionality can be accessed by these objects.
 
-.. autoclass:: Ensemble
-.. autofunction:: child
+.. autoclass:: ensemble.Ensemble
+.. autofunction:: ensemble.child
