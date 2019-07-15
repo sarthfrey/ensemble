@@ -56,7 +56,7 @@ Features
 Installation
 ------------
 
-Install ensemble by running:
+Install ensemble by running::
 
     pip install ensemble-pkg
 
@@ -69,8 +69,7 @@ Contribute
 Support
 -------
 
-If you are having issues, please let us know! Submit an issue, 
-or if you're feeling adventurous, a PR :)
+If you are having issues, please let us know! Submit an issue, or if you're feeling adventurous, a PR :)
 
 License
 -------
