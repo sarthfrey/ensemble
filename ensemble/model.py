@@ -51,11 +51,9 @@ def child(*ensemble_names):
   """
   A decorator used to attach a model function to ensembles
 
-  Parameters:
-  *ensemble_names (*List[str]): an unpacked list of ensemble names to attach the model to
-
-  Returns:
-  function: a wrapper that decorates the function as a Model()
+  :param ensemble_names: an unpacked list of ensemble names to attach the model to
+  :return: a wrapper function that decorates the function as model
+  :rtype: ensemble.model.Model
   """
   def wrapper(model_function):
     return Model(model_function, *ensemble_names)
