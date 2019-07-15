@@ -14,8 +14,10 @@ formats: all
 
 # Optionally set the version of Python
 python:
-  setup_py_install: true
   version: 3.7
+  install:
+    - method: setuptools
+        path: ../ensemble
 
 sphinx:
   builder: html
