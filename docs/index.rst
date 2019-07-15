@@ -3,29 +3,14 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to ensemble's documentation!
+Welcome to the ensemble's docs!
 ====================================
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
-
-
-ensemble
-========
-
-ensemble will solve your problem of where to start with documentation,
-by providing a basic explanation of how to do it easily.
+ensemble lets you combine your models and access them by a single object, called an ensemble. You may use that ensemble to multiplex between your models, call them all, and aggregate the results. You may even create ensembles of ensembles. ensemble borrows the idea of computation graph sessioning from tensorflow and implements the composite pattern for building tree hierarchies.
 
 Look how easy it is to use:
 
