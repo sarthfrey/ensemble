@@ -17,7 +17,7 @@ python:
   version: 3.7
   install:
     - method: setuptools
-        path: ../ensemble
+        path: ./
 
 sphinx:
   builder: html
