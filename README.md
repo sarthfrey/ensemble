@@ -10,7 +10,7 @@
 
 [![Documentation Status](https://readthedocs.org/projects/ensemble-pkg/badge/?version=latest)](https://ensemble-pkg.readthedocs.io/en/latest/?badge=latest)
 
-Read the docs at [docs](ensemble-pkg.readthedocs.io)
+Read the docs at [ensemble-pkg.readthedocs.io](https://ensemble-pkg.readthedocs.io)
 
 ### Installation
 
