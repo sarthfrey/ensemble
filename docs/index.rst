@@ -29,7 +29,7 @@ by providing a basic explanation of how to do it easily.
 
 Look how easy it is to use:
 
-``
+.. code-block:: python
 
     from ensemble import Ensemble
 
@@ -42,7 +42,7 @@ Look how easy it is to use:
 
     # call square from the ensemble
     e.multiplex('square', x=2) # returns 4
-``
+
 
 Features
 --------
