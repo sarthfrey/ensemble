@@ -5,6 +5,15 @@ from .node import Node
 
 
 class Graph:
+  """
+  Background object that maintains ensemble tree hierarchies for a session
+
+  | **nodes**: `node_name -> Node()`
+  | **arg_names**: `model_name -> arg_names`
+  | **ensemble_groups**: `model_name -> ensemble_names`
+  | **ensembles**: `ensemble_name -> ensemble`
+  | **weight_map**: `ensemble_name -> model_name -> weight`
+  """
   nodes = {}                          # node_name     -> Node()
   arg_names = defaultdict(set)        # model_name    -> arg_names
   ensemble_groups = defaultdict(set)  # model_name    -> ensemble_names

@@ -21,6 +21,6 @@ All of ensemble's functionality can be accessed by these objects.
 Internal Objects
 --------------
 
-.. autoclass:: model.Model
-.. autoclass:: graph.Graph
-.. autoclass:: node.Node
+.. autoclass:: ensemble.model.Model
+.. autoclass:: ensemble.graph.Graph
+.. autoclass:: ensemble.node.Node

@@ -5,6 +5,11 @@ from .graph import Graph
 
 
 class Model(Node):
+  """
+  An object that represents a callable model and that may be attached to
+  :class:`Ensemble <Ensemble>` objects, without interfering with the
+  underlying model function
+  """
   invalid_args_names = [
     'model',
   ]

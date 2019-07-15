@@ -5,6 +5,10 @@ from collections import defaultdict
 
 
 class Node(ABC):
+  """
+  Composite abstract base class for the :class:`Ensemble <Ensemble>` and
+  :class:`Model <Model>` classes, owned by sessioned :class:`Graph <Graph>` object
+  """
   @abstractmethod
   def __init__(self, *args, **kwargs):
     pass
