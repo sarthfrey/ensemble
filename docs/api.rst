@@ -1,6 +1,6 @@
 .. _api:
 
-Developer Interface
+API Documentation
 ===================
 
 .. module:: ensemble
@@ -15,12 +15,12 @@ Main Interface
 
 All of ensemble's functionality can be accessed by these objects.
 
-.. autoclass:: ensemble.Ensemble
-.. autofunction:: ensemble.child
+.. autoclass:: Ensemble
+.. autofunction:: child
 
 Internal Objects
 --------------
 
-.. autoclass:: ensemble.model.Model
-.. autoclass:: ensemble.graph.Graph
-.. autoclass:: ensemble.node.Node
+.. autoclass:: model.Model
+.. autoclass:: graph.Graph
+.. autoclass:: node.Node
