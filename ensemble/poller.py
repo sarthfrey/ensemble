@@ -1,4 +1,5 @@
 from functools import wraps
+from .types import PollingStrategy
 
 
 def poller(function):

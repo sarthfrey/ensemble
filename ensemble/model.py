@@ -2,6 +2,7 @@ import inspect
 
 from .node import Node
 from .graph import Graph
+from typing import Callable, Set
 
 
 class Model(Node):
@@ -14,7 +15,7 @@ class Model(Node):
     'model',
   ]
 
-  def __init__(self, model_function, *ensemble_names):
+  def __init__(self, model_function: Callable, *ensemble_names: str):
     self.name = model_function.__name__
     self.model_function = model_function
     self.ensemble_names = set(ensemble_names)
@@ -36,10 +37,10 @@ class Model(Node):
       ')'
     )
 
-  def get_name(self):
+  def get_name(self) -> str:
     return self.name
 
-  def get_arg_names(self):
+  def get_arg_names(self) -> Set[str]:
     return self.arg_names
 
   @staticmethod
@@ -52,7 +53,7 @@ class Model(Node):
           f'and so it may not have `{invalid_arg_name}` as an argument'
         )
 
-def child(*ensemble_names):
+def child(*ensemble_names: str) -> Callable:
   """
   A decorator used to attach a model function to ensembles
 
@@ -60,6 +61,6 @@ def child(*ensemble_names):
   :return: a wrapper function that decorates the function as model
   :rtype: :class:`Model <Model>` object
   """
-  def wrapper(model_function):
+  def wrapper(model_function: Callable) -> Model:
     return Model(model_function, *ensemble_names)
   return wrapper

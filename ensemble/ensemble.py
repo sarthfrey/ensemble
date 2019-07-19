@@ -3,10 +3,12 @@ import json
 import numpy as np
 
 from functools import partial
+from typing import Callable, Dict, List, Optional
 from .node import Node
 from .graph import Graph
 from .model import Model
 from .poller import poller
+from .types import PollingStrategy, CallMode
 
 
 class Ensemble(Node):
@@ -19,23 +21,17 @@ class Ensemble(Node):
   :param weights: optional `list` of `float` objects per child
   :param mode: optional `str` that specifies what the ensemble does when it is called
   """
-  POLLING_STRAGIES = {
-    'structured',
-    'flat',
-  }
-  MODES = {
-    'multiplex',
-    'all',
-    'aggregate',
-    'sum',
-    'mean',
-  }
-  DEFAULT_MODE = 'all'
 
-  def __init__(self, name, children=[], weights=None, mode=DEFAULT_MODE):
-    Ensemble._raise_if_invalid_init(name, children, weights, mode)
+  def __init__(
+    self,
+    name: str,
+    children: List[Callable] = [],
+    weights: Optional[List[np.ndarray]] = None,
+    mode: str = CallMode.DEFAULT_MODE.value,
+  ):
+    Ensemble._raise_if_invalid_init(name, children, weights)
     self.name = name
-    self.mode = mode
+    self.mode = CallMode(mode)
     self._init_to_graph(children, weights)
     self.children = Graph._get_children(self.name)
     self.weights = Graph._get_weights(self.name)
@@ -62,35 +58,29 @@ class Ensemble(Node):
   def __str__(self):
     return self.__repr__()
 
-  def _init_to_graph(self, children, weights):
+  def _init_to_graph(self, children: List[Callable], weights: Optional[List[np.ndarray]]):
     # Graph.ensembles[self.name] = self
     for i, child in enumerate(children):
       weight = None if weights is None else weights[i]
-      if callable(child) and not isinstance(child, Ensemble):
+      if not isinstance(child, Ensemble):
         child = Model(child, self.name)
       Graph.add_node(self.name, child, weight)
 
   # error helpers
 
   @classmethod
-  def _raise_if_invalid_init(cls, name, children, weights, mode):
+  def _raise_if_invalid_init(cls, name: str, children: List[Callable], weights: Optional[List[np.ndarray]]):
     cls._raise_if_invalid_ensemble_name(name)
-    cls._raise_if_invalid_weights(weights, children)
-    cls._raise_if_invalid_mode(mode)
+    cls._raise_if_invalid_weights(children, weights)
 
   @staticmethod
-  def _raise_if_invalid_ensemble_name(ensemble_name):
-    if not ensemble_name or not isinstance(ensemble_name, str):
+  def _raise_if_invalid_ensemble_name(ensemble_name: str):
+    if not ensemble_name:
       raise ValueError('Ensemble name must be a non-empty string')
 
   @staticmethod
-  def _raise_if_invalid_weights(weights, children):
+  def _raise_if_invalid_weights(children: List[Callable], weights: Optional[List[np.ndarray]]):
     if weights is not None and len(weights) != len(children):
-      raise ValueError('Number of weights must be equal to number of child models if weights are specified')
-
-  @classmethod
-  def _raise_if_invalid_mode(cls, mode):
-    if mode not in cls.MODES:
       raise ValueError('Number of weights must be equal to number of child models if weights are specified')
 
   @classmethod
@@ -109,32 +99,30 @@ class Ensemble(Node):
 
   # properties
 
-  def get_name(self):
+  def get_name(self) -> str:
     return self.name
 
-  def get_mode(self):
-    return self.mode
+  def get_mode(self) -> str:
+    return self.mode.value
 
-  def set_mode(self, mode):
-    self.mode = mode
+  def set_mode(self, mode: str):
+    self.mode = CallMode(mode)
     return self
 
-  def get_weights(self):
+  def get_weights(self) -> Optional[List[np.ndarray]]:
     return self.weights
 
-  def set_weights(self, weights):
+  def set_weights(self, weights: Optional[List[np.ndarray]]):
     self.weights = weights
 
-  def get_children(self):
+  def get_children(self) -> List[Node]:
     return self.children
 
-  def set_polling_strategy(self, polling_strategy):
-    if polling_strategy not in self.POLLING_STRAGIES:
-      raise f'`{polling_strategy}` is not a valid polling strategy'
-    self.polling_strategy = polling_strategy
+  def set_polling_strategy(self, polling_strategy: str):
+    self.polling_strategy = PollingStrategy(polling_strategy)
 
-  def get_polling_strategy(self):
-    return self.polling_strategy
+  def get_polling_strategy(self) -> str:
+    return self.polling_strategy.value
 
   # child polling helpers
 
@@ -142,9 +130,9 @@ class Ensemble(Node):
     for name, node in self.children.items():
       yield name, node
 
-  def generate_all_calls(self, arg_dict, **kwargs):
+  def generate_all_calls(self, arg_dict: Dict, **kwargs):
     for name, node in self.generate_children():
-      if arg_dict:
+      if self.get_polling_strategy() == 'structured':
         yield name, node(**arg_dict[name])
       else:
         if isinstance(node, self.__class__):
@@ -153,48 +141,48 @@ class Ensemble(Node):
           filtered_kwargs = {k: v for k, v in kwargs.items() if k in node.get_arg_names()}
           yield name, node(**filtered_kwargs)
 
-  def generate_all_call_return_values(self, arg_dict, **kwargs):
+  def generate_all_call_return_values(self, arg_dict: Dict, **kwargs):
     return (return_value for _, return_value in self.generate_all_calls(arg_dict, **kwargs))
 
-  def get_all_call_return_values(self, arg_dict, **kwargs):
+  def get_all_call_return_values(self, arg_dict: Dict, **kwargs):
     return list(self.generate_all_call_return_values(arg_dict, **kwargs))
 
   # main callers
 
-  def multiplex(self, child, **kwargs):
+  def multiplex(self, child: str, **kwargs):
     Ensemble._raise_if_node_not_found(child)
     Ensemble._raise_if_node_not_in_ensemble(self.name, child)
     child = self.children[child]
     return child(**kwargs)
 
   @poller
-  def all(self, arg_dict=dict(), **kwargs):
+  def all(self, arg_dict: Dict = dict(), **kwargs):
     return {k: v for k, v in self.generate_all_calls(arg_dict, **kwargs)}
 
   @poller
-  def aggregate(self, agg, arg_dict=dict(), **kwargs):
+  def aggregate(self, agg: Callable, arg_dict=dict(), **kwargs):
     return agg(self.get_all_call_return_values(arg_dict, **kwargs))
 
   @poller
-  def mean(self, arg_dict=dict(), **kwargs):
+  def mean(self, arg_dict: Dict = dict(), **kwargs) -> np.float:
     return self.aggregate(np.mean, arg_dict, **kwargs)
 
   @poller
-  def sum(self, arg_dict=dict(), **kwargs):
+  def sum(self, arg_dict: Dict = dict(), **kwargs) -> np.float:
     return self.aggregate(np.sum, arg_dict, **kwargs)
 
   # other callers
 
   @poller
-  def weighted_mean(self, arg_dict=dict(), **kwargs):
+  def weighted_mean(self, arg_dict: Dict = dict(), **kwargs) -> np.float:
     agg = partial(np.average, weights=self.weights)
     return self.aggregate(agg, arg_dict, **kwargs)
 
   @poller
-  def weighted_sum(self, arg_dict=dict(), **kwargs):
+  def weighted_sum(self, arg_dict: Dict = dict(), **kwargs) -> np.float:
     agg = lambda values: np.dot(values, self.weights)
     return self.aggregate(agg, arg_dict, **kwargs)
 
   @poller
-  def vote(self, arg_dict=dict(), **kwargs):
+  def vote(self, arg_dict: Dict = dict(), **kwargs) -> np.float:
     return self.aggregate(np.bincount, arg_dict, **kwargs).argmax()
