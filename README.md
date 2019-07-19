@@ -28,28 +28,36 @@ Define your model functions and create your ensemble:
 >>> from ensemble import Ensemble
 >>> def square(x):
 ...     return x**2
-...
->>> def cube(y):
-...     return y**3
-...
->>> my_ensemble = Ensemble(
-...     name='e1',
-...     children=[function1, function2],
-... )
+>>> def cube(x):
+...     return x**3
+>>> e = Ensemble(name='e1', children=[square, cube])
+```
+
+Call all the models in the ensemble:
+```python
+>>> e(x=2)
+{'square': 4, 'cube': 8}
+>>> e(dict(
+...   square=dict(x=2),
+...   cube=dict(x=3),
+... ))
+{'square': 4, 'cube': 27}
 ```
 
 Multiplex between functions:
 
 ```python
->>> my_ensemble(child='square', x=2)
+>>> e.multiplex('square', x=2)
 4
->>> my_ensemble(child='cube', y=2)
+>>> e.multiplex('cube', x=2)
 8
 ```
 
 Call all the models in the ensemble:
 
 ```python
+>>> e.all(dict(square=dict(x=2), cube=dict(x=3)))
+{'square': 4, 'cube': 27}
 >>> my_ensemble.all(x=2, y=2)
 {'square': 4, 'cube': 8}
 ```
@@ -66,24 +74,69 @@ You may instead decorate your model functions with `@model` in order to attach t
 ... def func2(x):
 ...     return x**3
 ...
->>> e2 = Ensemble('e2')
->>> e2.all(x=3)
+>>> e = Ensemble('e2')
+>>> e(x=3)
 {'func1': 9, 'func2': 27}
 ```
 
-You may even attach a model to multiple ensembles! (this is one main reason *ensemble* is useful)
+You may even attach a model to multiple ensembles!
 
 ```python
 >>> @child('e2', 'e3')
 ... def func3(x, y):
 ...     return x**3 + y
 ...
->>> e2.all(x=2, y=3)
+>>> e2(x=2, y=3)
 {'func1': 4, 'func2': 8, 'func3': 11}
 >>>
 >>> e3 = Ensemble('e3')
->>> e3.all(x=2, y=3)
+>>> e3(x=2, y=3)
 {'func3': 11}
+```
+
+Compute statstical aggregations from your ensemble's models:
+
+```python
+>>> def a(x):
+...   return x + 1
+...
+>>> def b(y):
+...   return y + 2
+...
+>>> def c(z):
+...   return z + 2
+...
+>>> e = Ensemble('e4', children=[a, b], weights=[3.0, 1.0])
+>>> e.mean(x=2, y=3)
+4.0
+>>> e.weighted_mean(x=2, y=3)
+3.5
+>>> e.weighted_sum(x=2, y=3)
+14.0
+>>> e = Ensemble('e6', [a, b, c])
+>>> e.vote(x=1, y=1, z=1)
+3
+```
+
+Build ensembles of ensembles!
+
+```python
+>>> first_ensemble = Ensemble('first', children=[c])
+>>> second_ensemble = Ensemble('second', children=[a, b])
+>>> parent_ensemble = Ensemble('parent', children=[first_ensemble, second_ensemble])
+>>> parent_ensemble(x=1, y=1, z=1)
+{'first': {'c': 3}, 'second': {'a': 2, 'b': 3}}
+>>> parent_ensemble.multiplex('second', x=3, y=1)
+{'a': 4, 'b': 3}
+```
+
+Use that idea to chain aggregate computations! Compute the mean of the sum of the model outputs in each ensemble:
+
+```python
+>>> first_ensemble.set_mode('sum')
+>>> second_ensemble.set_mode('sum')
+>>> parent_ensemble.mean(x=1, y=1, z=1)
+4.0
 ```
 
 If you forget what models are in your ensemble, just check:
@@ -98,6 +151,7 @@ Ensemble(
     'func3': <function func3 at 0x1024fa950>
   },
   weights=None,
+  mode='all',
 )
 >>> e3
 Ensemble(
@@ -106,6 +160,7 @@ Ensemble(
     'func3': <function func3 at 0x1024fa950>
   },
   weights=None,
+  mode='all',
 )
 ```
 
