@@ -49,22 +49,16 @@ if __name__ == '__main__':
   except ValueError:
     pass
 
-  # you may specify your arguments positionally as usual
-  try:
-    print(e1(3, child='f'))
-  except ValueError:
-    pass
-    
   # you may call your functions normally
   print(f(1))
   print(g(1))
   print(f(1))
 
-  print(e1)
+  #print(e1)
 
   # send the same arguments to all the models in the ensemble and get all results
   e3 = Ensemble('e3')
-  print(e3(x=2, y=3))
+  print(e3.all(x=2, y=3))
 
   def a(x):
     return x + 1
@@ -85,7 +79,7 @@ if __name__ == '__main__':
   e5 = Ensemble('e5', children=[a, b], weights=[3.0, 1.0]) 
   print(e5.weighted_mean(x=2, y=3))
   print(e5.weighted_sum(x=2, y=3))
-  print(e5)
+  #print(e5)
 
   e6 = Ensemble('e6', [a, b, c])
   print(e6.vote(x=1, y=1, z=1))
@@ -98,6 +92,15 @@ if __name__ == '__main__':
   print(e8(x=1, y=1, z=1))
 
   e = Ensemble('ab', [a, b])
-  print(e(x=1, y=1  ))
+  print(e(x=1, y=1))
+  print(e(dict(a=dict(x=2), b=dict(y=2))))
+
+
+
+
+
+
+
+
 
 
