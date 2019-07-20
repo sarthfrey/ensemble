@@ -19,7 +19,7 @@ All of ensemble's functionality can be accessed by these objects.
 .. autofunction:: child
 
 Internal Objects
---------------
+----------------
 
 .. autoclass:: ensemble.model.Model
 .. autoclass:: ensemble.graph.Graph
