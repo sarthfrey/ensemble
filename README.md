@@ -122,7 +122,9 @@ Use that idea to chain aggregate computations! Compute the mean of the sum of th
 
 ```python
 >>> first_ensemble.set_mode('sum')
+Ensemble(name='first', children=['c'], weights=None, mode='sum')
 >>> second_ensemble.set_mode('sum')
+Ensemble(name='second', children=['a', 'b'], weights=None, mode='sum')
 >>> parent_ensemble.mean(x=1, y=1, z=1)
 4.0
 ```
@@ -130,26 +132,13 @@ Use that idea to chain aggregate computations! Compute the mean of the sum of th
 If you forget what models are in your ensemble, just check:
 
 ```python
->>> e2
-Ensemble(
-  name='e2',
-  children={
-    'func1': <function func1 at 0x1024fa9d8>
-    'func2': <function func2 at 0x1024faa60>
-    'func3': <function func3 at 0x1024fa950>
-  },
-  weights=None,
-  mode='all',
-)
->>> e3
-Ensemble(
-  name='e3',
-  children={
-    'func3': <function func3 at 0x1024fa950>
-  },
-  weights=None,
-  mode='all',
-)
+>>> print(parent_ensemble)
+Ensemble(name='parent', children=['first', 'second'], weights=None, mode='all')
+  Ensemble(name='first', children=['c'], weights=None, mode='sum')
+    Model(name='c', func=c(z))
+  Ensemble(name='second', children=['a', 'b'], weights=None, mode='sum')
+    Model(name='a', func=a(x))
+    Model(name='b', func=b(y))
 ```
 
-In the above example, ensemble `e2` contains `func1`, `func2`, and `func3`, while ensemble `e3` contains just `func3`.
+In the above example, a tree is shown which shows which models and ensembles are the children of which ensembles!
