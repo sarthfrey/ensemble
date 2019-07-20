@@ -50,7 +50,7 @@ Multiplex between functions:
 27
 ```
 
-You may instead decorate your model functions with `@model` in order to attach them to an ensemble:
+You may instead decorate your model functions with `@child` in order to attach them to an ensemble:
 
 ```python
 >>> from ensemble import child
