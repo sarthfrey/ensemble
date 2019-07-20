@@ -29,13 +29,13 @@ class Model(Node):
   def __call__(self, *args, **kwargs):
     return self.model_function(*args, **kwargs)
 
-  def __repr__(self):
+  def __repr__(self) -> str:
     return (
-      'Model(\n'
-      f'  name=\'{self.name}\',\n'
-      f'  function=\'{self.model_function}\',\n'
-      ')'
+      f"Model(name='{self.name}', func={self.name}({', '.join(self.arg_names)}))"
     )
+
+  def __str__(self, level: int = 0) -> str:
+    return '\t' * level + repr(self) + "\n"
 
   def get_name(self) -> str:
     return self.name

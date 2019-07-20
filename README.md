@@ -37,11 +37,8 @@ Call all the models in the ensemble:
 ```python
 >>> e(x=2)
 {'square': 4, 'cube': 8}
->>> e(dict(
-...   square=dict(x=2),
-...   cube=dict(x=3),
-... ))
-{'square': 4, 'cube': 27}
+>>> e(x=3)
+{'square': 9, 'cube': 27}
 ```
 
 Multiplex between functions:
@@ -49,17 +46,8 @@ Multiplex between functions:
 ```python
 >>> e.multiplex('square', x=2)
 4
->>> e.multiplex('cube', x=2)
-8
-```
-
-Call all the models in the ensemble:
-
-```python
->>> e.all(dict(square=dict(x=2), cube=dict(x=3)))
-{'square': 4, 'cube': 27}
->>> my_ensemble.all(x=2, y=2)
-{'square': 4, 'cube': 8}
+>>> e.multiplex('cube', x=3)
+27
 ```
 
 You may instead decorate your model functions with `@model` in order to attach them to an ensemble:

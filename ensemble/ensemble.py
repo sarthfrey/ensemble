@@ -3,7 +3,7 @@ import json
 import numpy as np
 
 from functools import partial
-from typing import Callable, Dict, List, Optional
+from typing import Callable, Dict, Iterator, List, Optional, Tuple
 from .node import Node
 from .graph import Graph
 from .model import Model
@@ -39,27 +39,19 @@ class Ensemble(Node):
   def __call__(self, *args, **kwargs):
     return getattr(self, self.get_mode())(*args, **kwargs)
 
-  def __repr__(self):
-    m = ''.join(f'    \'{k}\': {pprint.pformat(v)},\n' for k, v in self.generate_children())
-    if self.get_weights() is None:
-      w = None
-    else:
-      w = '[\n' + ''.join(f'    \'{weight}\',\n' for weight in self.get_weights()) + '  ]'
+  def __repr__(self) -> str:
     return (
-      'Ensemble(\n'
-      f'  name=\'{self.name}\',\n'
-      '  children={\n'
-      f'{m}'
-      '  },\n'
-      f'  weights={w},\n'
-      ')'
+      f"Ensemble(name='{self.name}', children={str(list(self.children.keys()))}, "
+      f"weights={str(self.weights)}, mode='{self.get_mode()}')"
     )
 
-  def __str__(self):
-    return self.__repr__()
+  def __str__(self, level: int = 0) -> str:
+    ret = '\t' * level + repr(self) + "\n"
+    for child in self.children.values():
+      ret += child.__str__(level+1)
+    return ret
 
   def _init_to_graph(self, children: List[Callable], weights: Optional[List[np.ndarray]]):
-    # Graph.ensembles[self.name] = self
     for i, child in enumerate(children):
       weight = None if weights is None else weights[i]
       if not isinstance(child, Ensemble):
@@ -126,11 +118,11 @@ class Ensemble(Node):
 
   # child polling helpers
 
-  def generate_children(self):
+  def generate_children(self) -> Iterator[Tuple[str, Node]]:
     for name, node in self.children.items():
       yield name, node
 
-  def generate_all_calls(self, arg_dict: Dict, **kwargs):
+  def generate_all_calls(self, arg_dict: Dict, **kwargs) -> Iterator[Tuple[str, None]]:
     for name, node in self.generate_children():
       if self.get_polling_strategy() == 'structured':
         yield name, node(**arg_dict[name])
