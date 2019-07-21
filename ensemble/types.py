@@ -12,4 +12,7 @@ class CallMode(Enum):
   AGGREGATE = 'aggregate'
   SUM = 'sum'
   MEAN = 'mean'
-  DEFAULT_MODE = 'all'
+  DEFAULT_MODE = 'call_children'
+  MAX = 'max'
+  ANY = 'any'
+  CALL_CHILDREN = 'call_children'

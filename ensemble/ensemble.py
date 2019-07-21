@@ -35,9 +35,13 @@ class Ensemble(Node):
     self._init_to_graph(children, weights)
     self.children = Graph._get_children(self.name)
     self.weights = Graph._get_weights(self.name)
+    self.wrapper = None
+    self.child_wrapper = None
+    self.child_decorator = None
 
   def __call__(self, *args, **kwargs):
-    return getattr(self, self.get_mode())(*args, **kwargs)
+    ret = getattr(self, self.get_mode())(*args, **kwargs)
+    return ret if self.wrapper is None else self.wrapper(ret)
 
   def __repr__(self) -> str:
     return (
@@ -57,6 +61,12 @@ class Ensemble(Node):
       if not isinstance(child, Ensemble):
         child = Model(child, self.name)
       Graph.add_node(self.name, child, weight)
+
+  def call_child(self, child_name, **kwargs):
+    child = self.children[child_name]
+    child = child if self.child_decorator is None else self.child_decorator(child)
+    ret = child(**kwargs)
+    return ret if self.child_wrapper is None else self.child_wrapper(ret)
 
   # error helpers
 
@@ -94,6 +104,18 @@ class Ensemble(Node):
   def get_name(self) -> str:
     return self.name
 
+  def get_wrapper(self) -> Callable:
+    return self.wrapper
+
+  def wrap(self, wrapper: Callable):
+    self.wrapper = wrapper
+
+  def wrap_children(self, wrapper: Callable):
+    self.child_wrapper = wrapper
+
+  def decorate_children(self, decorator: Callable):
+    self.child_decorator = decorator
+
   def get_mode(self) -> str:
     return self.mode.value
 
@@ -125,13 +147,13 @@ class Ensemble(Node):
   def generate_all_calls(self, arg_dict: Dict, **kwargs) -> Iterator[Tuple[str, None]]:
     for name, node in self.generate_children():
       if self.get_polling_strategy() == 'structured':
-        yield name, node(**arg_dict[name])
+        yield name, self.call_child(name, **arg_dict[name])
       else:
         if isinstance(node, self.__class__):
-          yield name, node(**kwargs)
+          yield name, self.call_child(name, **kwargs)
         else:
           filtered_kwargs = {k: v for k, v in kwargs.items() if k in node.get_arg_names()}
-          yield name, node(**filtered_kwargs)
+          yield name, self.call_child(name, **filtered_kwargs)
 
   def generate_all_call_return_values(self, arg_dict: Dict, **kwargs):
     return (return_value for _, return_value in self.generate_all_calls(arg_dict, **kwargs))
@@ -144,11 +166,10 @@ class Ensemble(Node):
   def multiplex(self, child: str, **kwargs):
     Ensemble._raise_if_node_not_found(child)
     Ensemble._raise_if_node_not_in_ensemble(self.name, child)
-    child = self.children[child]
-    return child(**kwargs)
+    return self.call_child(child, **kwargs)
 
   @poller
-  def all(self, arg_dict: Dict = dict(), **kwargs):
+  def call_children(self, arg_dict: Dict = dict(), **kwargs):
     return {k: v for k, v in self.generate_all_calls(arg_dict, **kwargs)}
 
   @poller
@@ -162,6 +183,18 @@ class Ensemble(Node):
   @poller
   def sum(self, arg_dict: Dict = dict(), **kwargs) -> np.float:
     return self.aggregate(np.sum, arg_dict, **kwargs)
+
+  @poller
+  def max(self, arg_dict: Dict = dict(), **kwargs) -> np.float:
+    return self.aggregate(max, arg_dict, **kwargs)
+
+  @poller
+  def any(self, arg_dict: Dict = dict(), **kwargs) -> np.float:
+    return self.aggregate(any, arg_dict, **kwargs)
+
+  @poller
+  def all(self, arg_dict: Dict = dict(), **kwargs) -> np.float:
+    return self.aggregate(all, arg_dict, **kwargs)
 
   # other callers
 
