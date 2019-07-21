@@ -1,4 +1,3 @@
-import pprint
 import json
 import numpy as np
 
@@ -149,7 +148,7 @@ class Ensemble(Node):
       if self.get_polling_strategy() == 'structured':
         yield name, self.call_child(name, **arg_dict[name])
       else:
-        if isinstance(node, self.__class__):
+        if isinstance(node, self.__class__) or self.child_decorator is not None:
           yield name, self.call_child(name, **kwargs)
         else:
           filtered_kwargs = {k: v for k, v in kwargs.items() if k in node.get_arg_names()}
