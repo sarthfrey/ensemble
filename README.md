@@ -2,7 +2,7 @@
 
 *A model ensemble package optimized for low barrier integration*
 
-![Model Ensemble](img.png)
+![Model Ensemble](img/main.png)
 
 **ensemble** lets you combine your models and access them by a single object. You may use that ensemble to multiplex between your models, call them all, and aggregate the results. You may even create ensembles of ensembles!
 
@@ -81,6 +81,10 @@ Finally we run `results(dataset=get_dataset())` and get the following results as
  'model1': {'precision': '18.2%', 'recall': '100.0%'},
  'model2': {'precision': '30.0%', 'recall': '100.0%'}}
 ```
+
+In a few keystrokes, we built the following graph structure.
+
+![Graph Structure](img/graph.png)
 
 ### Examples
 
