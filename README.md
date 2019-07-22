@@ -20,6 +20,68 @@ Read the docs at [ensemble-pkg.readthedocs.io](https://ensemble-pkg.readthedocs.
 pip install ensemble-pkg
 ```
 
+### Case Study
+
+Let's say we have two models that accomplish a binary classification task. We want to be able to easily combine the two models into an ensemble and then test the precision and recall of both models and the ensemble. With this package, it's easy.
+
+We start off by building our two models for a dataset. In this case, the task is classifying if a number is divisble by 15. We have two models, one says the number is divisble by 15 if it is divisble by 3 and the other says so if it is divisble by 5.
+
+```python
+def model1(x):
+  return x % 3 == 0
+
+def model2(x):
+  return x % 5 == 0
+
+def get_dataset():
+  return [(i, i % 15 == 0) for i in range(1, 101)]
+```
+
+Define a function that gets our precision and recall for a given dataset and set of predictions:
+
+```python
+def get_results(dataset, preds):
+  labels = [label for _, label in dataset]
+  positives = sum(1 for label in labels if label)
+  predicted_positives = sum(1 for pred in preds if pred)
+  true_positives = sum(1 for label, pred in zip(labels, preds) if label and pred)
+  return 100.0 * true_positives / predicted_positives, 100.0 * true_positives / positives
+```
+
+Next we build a model ensemble from `model1` and `model2`, specifically one that only outputs `True` if all its children output `True`. In this case, the ensemble would then only output `True` if the input is both divisible by 3 and 5.
+
+```python
+e = Ensemble('ensemble', children=[model1, model2], mode='all')
+e(x=3) # returns False
+e(x=5) # returns False
+e(x=15) # returns True
+```
+
+Finally, lets build another ensemble from our two models and the ensemble in order to easily aggregate the precision and recall stats for each model. We do this by decorating each child model with an evaluation decorator which modifies the models to take a dataset and output precision and recall, instead of taking a number and outputing `True` or `False`.
+
+```python
+def evaluate(model):
+  def wrapper(dataset):
+    preds = [model(x=x) for x, _ in dataset]
+    precision, recall = get_results(dataset, preds)
+    return {
+      'precision': f'{precision:.1f}%',
+      'recall': f'{recall:.1f}%',
+    }
+  return wrapper
+
+results = Ensemble('results', children=[model1, model2, e])
+results.decorate_children(evaluate)
+```
+
+Finally we run `results(dataset=get_dataset())` and get the following results as expected!
+
+```
+{'ensemble': {'precision': '100.0%', 'recall': '100.0%'},
+ 'model1': {'precision': '18.2%', 'recall': '100.0%'},
+ 'model2': {'precision': '30.0%', 'recall': '100.0%'}}
+```
+
 ### Examples
 
 Define your model functions and create your ensemble:
