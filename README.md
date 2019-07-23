@@ -2,7 +2,7 @@
 
 *A model ensemble package optimized for low barrier integration*
 
-<img alt="Model Ensemble" src="img/main.png" width="70%" height="70%"/>
+<img alt="Model Ensemble" src="img/main.png" width="40%" height="40%"/>
 
 **ensemble** lets you combine your models and access them by a single object. You may use that ensemble to multiplex between your models, call them all, and aggregate the results. You may even create ensembles of ensembles!
 
