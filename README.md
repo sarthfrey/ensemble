@@ -84,7 +84,7 @@ Finally we run `results(dataset=get_dataset())` and get the following results as
 
 In a few keystrokes, we built the following graph structure.
 
-![Graph Structure](img/graph.png)
+![Graph Structure](img/graph.png){:height="50%" width="50%"}
 
 ### Examples
 
