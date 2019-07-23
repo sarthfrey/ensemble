@@ -2,7 +2,7 @@
 
 *A model ensemble package optimized for low barrier integration*
 
-![Model Ensemble](img/main.png)
+<img alt="Model Ensemble" src="img/main.png" width="70%" height="70%"/>
 
 **ensemble** lets you combine your models and access them by a single object. You may use that ensemble to multiplex between your models, call them all, and aggregate the results. You may even create ensembles of ensembles!
 
@@ -84,7 +84,7 @@ Finally we run `results(dataset=get_dataset())` and get the following results as
 
 In a few keystrokes, we built the following graph structure.
 
-<img alt="Graph Structure" src="img/graph.png" width="20%" height="20%"/>
+<img alt="Graph Structure" src="img/graph.png" width="30%" height="30%"/>
 
 ### Examples
 
