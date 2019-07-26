@@ -34,7 +34,10 @@ class Model(Node):
       f"Model(name='{self.name}', func={self.name}({', '.join(self.arg_names)}))"
     )
 
-  def __str__(self, level: int = 0) -> str:
+  def __str__(self):
+    return self._str()
+
+  def _str(self, level: int = 0) -> str:
     return '\t' * level + repr(self) + "\n"
 
   def get_name(self) -> str:

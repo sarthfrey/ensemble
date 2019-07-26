@@ -51,9 +51,12 @@ class Ensemble(Node):
     )
 
   def __str__(self, level: int = 0) -> str:
+    return self._str()[:-1]
+
+  def _str(self, level: int = 0) -> str:
     ret = '\t' * level + repr(self) + "\n"
     for child in self.children.values():
-      ret += child.__str__(level+1)
+      ret += child._str(level+1)
     return ret
 
   def _init_to_graph(self, children: List[Callable], weights: Optional[List[np.ndarray]]):

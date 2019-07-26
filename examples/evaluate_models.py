@@ -32,6 +32,7 @@ if __name__ == '__main__':
   e = Ensemble('ensemble', children=[model1, model2], mode='all')
   results = Ensemble('results', children=[model1, model2, e])
   results.decorate_children(evaluate)
+  print(results)
   pprint(
     results(dataset=get_dataset())
   )

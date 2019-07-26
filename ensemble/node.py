@@ -22,11 +22,19 @@ class Node(ABC):
     pass
 
   @abstractmethod
+  def __str__(self, *args, **kwargs):
+    pass
+
+  @abstractmethod
   def get_name(self):
     pass
 
   def get_arg_names(self):
     return set(inspect.getfullargspec(self)[0])
+
+  @abstractmethod
+  def _str(self):
+    pass
 
 """
   @abstractmethod
