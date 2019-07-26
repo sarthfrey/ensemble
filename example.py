@@ -101,7 +101,8 @@ if __name__ == '__main__':
 
   e = Ensemble('ab', [a, b])
   print(e(x=1, y=1))
-  print(e(dict(a=dict(x=2), b=dict(y=2))))
+  #print(e(dict(a=dict(x=2), b=dict(y=2))))
+  print(e(2))
   print(e8)
 
 
