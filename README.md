@@ -1,6 +1,6 @@
 # ensemble
 
-A model ensemble package optimized for low barrier integration, *bagging*, *boosting*, *stacking*, and more.
+Combine models into an ensemble easily. Supports *bagging*, *boosting*, *stacking*, and more.
 
 <img alt="Model Ensemble" src="img/main.png" width="55%" height="55%"/>
 
