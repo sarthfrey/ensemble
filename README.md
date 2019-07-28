@@ -1,10 +1,10 @@
 # ensemble
 
-Combine models into an ensemble easily. Supports *bagging*, *boosting*, *stacking*, and more.
+Combine your models, *easily*.
 
 <img alt="Model Ensemble" src="img/main.png" width="55%" height="55%"/>
 
-**ensemble** lets you combine your models and access them by a single object. You may use that ensemble to multiplex between your models, call them all, and aggregate the results. You may even create ensembles of ensembles!
+**ensemble** lets you combine your models and access them by a single object. You may use that ensemble to multiplex between your models, call them all, and aggregate the results. You can do *bagging*, *boosting*, *stacking*, and more. You may even create ensembles of ensembles!
 
 This package borrows the idea of computation graph sessioning from [TensorFlow](https://github.com/tensorflow/tensorflow) and implements the [composite pattern](https://en.wikipedia.org/wiki/Composite_pattern) for building tree hierarchies.
 
