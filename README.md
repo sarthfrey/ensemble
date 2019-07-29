@@ -1,6 +1,6 @@
 # ensemble
 
-Combine your models, *easily*.
+Combine models, *easily*.
 
 <img alt="Model Ensemble" src="img/main.png" width="55%" height="55%"/>
 
