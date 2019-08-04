@@ -16,3 +16,4 @@ class CallMode(Enum):
   MAX = 'max'
   ANY = 'any'
   CALL_CHILDREN = 'call_children'
+  VOTE = 'vote'

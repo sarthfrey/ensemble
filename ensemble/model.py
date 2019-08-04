@@ -2,7 +2,7 @@ import inspect
 
 from .node import Node
 from .graph import Graph
-from typing import Callable, Set
+from typing import Callable, Set, Optional, List
 
 
 class Model(Node):
@@ -12,19 +12,24 @@ class Model(Node):
   underlying model function
   """
   invalid_args_names = [
-    'model',
   ]
 
-  def __init__(self, model_function: Callable, *ensemble_names: str):
-    self.name = model_function.__name__
-    self.model_function = model_function
+  def __init__(
+    self,
+    name: str,
+    call: Callable,
+    ensemble_names: List[str] = [],
+    is_function: bool = False,
+  ):
+    self.name = name
+    self.model_function = call
     self.ensemble_names = set(ensemble_names)
-    self.arg_names = set(inspect.getfullargspec(model_function)[0])
+    self.is_function = is_function
+    self.arg_names = set(inspect.getfullargspec(call)[0]) if is_function else None
     if any(not ensemble_name for ensemble_name in self.ensemble_names):
       raise ValueError('Must provide a valid ensemble names')
     for ensemble_name in ensemble_names:
       Graph.add_node(ensemble_name, self)
-    Model._validate_model_function(model_function)
 
   def __call__(self, *args, **kwargs):
     return self.model_function(*args, **kwargs)
@@ -46,16 +51,6 @@ class Model(Node):
   def get_arg_names(self) -> Set[str]:
     return self.arg_names
 
-  @staticmethod
-  def _validate_model_function(model_function):
-    arg_names = inspect.getfullargspec(model_function)[0]
-    for invalid_arg_name in Model.invalid_args_names:
-      if invalid_arg_name in arg_names:
-        raise ValueError(
-          f'Function `{model_function.__name__}` is decorated with @model '
-          f'and so it may not have `{invalid_arg_name}` as an argument'
-        )
-
 def child(*ensemble_names: str) -> Callable:
   """
   A decorator used to attach a model function to ensembles
@@ -65,5 +60,10 @@ def child(*ensemble_names: str) -> Callable:
   :rtype: :class:`Model <Model>` object
   """
   def wrapper(model_function: Callable) -> Model:
-    return Model(model_function, *ensemble_names)
+    return Model(
+      name=model_function.__name__,
+      call=model_function,
+      ensemble_names=[*ensemble_names],
+      is_function=True
+    )
   return wrapper

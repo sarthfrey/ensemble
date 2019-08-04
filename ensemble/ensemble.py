@@ -2,6 +2,7 @@ import json
 import numpy as np
 
 from functools import partial
+from itertools import groupby
 from typing import Callable, Dict, Iterator, List, Optional, Tuple
 from .node import Node
 from .graph import Graph
@@ -62,8 +63,14 @@ class Ensemble(Node):
   def _init_to_graph(self, children: List[Callable], weights: Optional[List[np.ndarray]]):
     for i, child in enumerate(children):
       weight = None if weights is None else weights[i]
-      if not isinstance(child, Ensemble):
-        child = Model(child, self.name)
+      is_function = not isinstance(child, Node)
+      if is_function:
+        child = Model(
+          child.__name__,
+          child,
+          ensemble_names=[self.name],
+          is_function=True,
+        )
       Graph.add_node(self.name, child, weight)
 
   def call_child(self, child_name, *args, **kwargs):
@@ -204,4 +211,5 @@ class Ensemble(Node):
     return self.aggregate(agg, *args, **kwargs)
 
   def vote(self, *args, **kwargs) -> np.float:
-    return self.aggregate(np.bincount, *args, **kwargs).argmax()
+    agg = lambda arr: max(set(arr), key=arr.count)
+    return self.aggregate(agg, *args, **kwargs)
