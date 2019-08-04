@@ -6,13 +6,13 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
   name="ensemble-pkg",
-  version="0.0.2",
+  version="0.0.3",
   author="sarthfrey",
   author_email="sarth.frey@gmail.com",
-  description="Build deployable model ensembles without refactoring your code.",
+  description="Combine models, easily.",
   long_description=long_description,
   long_description_content_type="text/markdown",
-  url="https://github.com/sarthfrey/onus",
+  url="https://github.com/sarthfrey/ensemble",
   packages=setuptools.find_packages(),
   classifiers=[
     "Development Status :: 1 - Planning",
